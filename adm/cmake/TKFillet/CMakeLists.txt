@@ -1,15 +1,15 @@
 project(TKFillet)
 
 if (WIN32)
-  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__ChFiDS_DLL" )
-  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__ChFi2d_DLL" )
-  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__ChFi3d_DLL" )
-  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__ChFiKPart_DLL" )
-  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__Blend_DLL" )
-  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__BRepBlend_DLL" )
-  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__BlendFunc_DLL" )
-  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__BRepFilletAPI_DLL" )
-  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__FilletSurf_DLL" )
+#  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__ChFiDS_DLL" )
+#  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__ChFi2d_DLL" )
+#  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__ChFi3d_DLL" )
+#  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__ChFiKPart_DLL" )
+#  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__Blend_DLL" )
+#  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__BRepBlend_DLL" )
+#  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__BlendFunc_DLL" )
+#  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__BRepFilletAPI_DLL" )
+#  list( APPEND TKFillet_PRECOMPILED_DEFS "-D__FilletSurf_DLL" )
   string( REGEX REPLACE ";" " " TKFillet_PRECOMPILED_DEFS "${TKFillet_PRECOMPILED_DEFS}")
 endif()
 
@@ -1568,7 +1568,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKFillet)
- add_library( TKFillet SHARED ${TKFillet_USED_SRCFILES} )
+ add_library( TKFillet STATIC ${TKFillet_USED_SRCFILES} )
 
  set_property(TARGET TKFillet PROPERTY FOLDER ModelingAlgorithms)
 
@@ -1587,3 +1587,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKFillet)
  include_directories( ${TKFillet_COMPILER_DIRECTORIES} )
  target_link_libraries( TKFillet ${TKFillet_USED_LIBS} )
 endif()
+

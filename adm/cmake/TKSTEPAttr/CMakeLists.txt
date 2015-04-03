@@ -1,10 +1,10 @@
 project(TKSTEPAttr)
 
 if (WIN32)
-  list( APPEND TKSTEPAttr_PRECOMPILED_DEFS "-D__StepVisual_DLL" )
-  list( APPEND TKSTEPAttr_PRECOMPILED_DEFS "-D__RWStepVisual_DLL" )
-  list( APPEND TKSTEPAttr_PRECOMPILED_DEFS "-D__StepDimTol_DLL" )
-  list( APPEND TKSTEPAttr_PRECOMPILED_DEFS "-D__RWStepDimTol_DLL" )
+#  list( APPEND TKSTEPAttr_PRECOMPILED_DEFS "-D__StepVisual_DLL" )
+#  list( APPEND TKSTEPAttr_PRECOMPILED_DEFS "-D__RWStepVisual_DLL" )
+#  list( APPEND TKSTEPAttr_PRECOMPILED_DEFS "-D__StepDimTol_DLL" )
+#  list( APPEND TKSTEPAttr_PRECOMPILED_DEFS "-D__RWStepDimTol_DLL" )
   string( REGEX REPLACE ";" " " TKSTEPAttr_PRECOMPILED_DEFS "${TKSTEPAttr_PRECOMPILED_DEFS}")
 endif()
 
@@ -2316,7 +2316,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKSTEPAttr)
- add_library( TKSTEPAttr SHARED ${TKSTEPAttr_USED_SRCFILES} )
+ add_library( TKSTEPAttr STATIC ${TKSTEPAttr_USED_SRCFILES} )
 
  set_property(TARGET TKSTEPAttr PROPERTY FOLDER DataExchange)
 
@@ -2335,3 +2335,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKSTEPAttr)
  include_directories( ${TKSTEPAttr_COMPILER_DIRECTORIES} )
  target_link_libraries( TKSTEPAttr ${TKSTEPAttr_USED_LIBS} )
 endif()
+

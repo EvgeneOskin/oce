@@ -1,5 +1,5 @@
 // Created on: 2012-01-19
-// Created by: Dmitry BOBYLEV 
+// Created by: Dmitry BOBYLEV
 // Copyright (c) 2012-2014 OPEN CASCADE SAS
 //
 // This file is part of Open CASCADE Technology software library.
@@ -15,6 +15,7 @@
 
 #ifndef _Standard_DefineAlloc_HeaderFile
 #define _Standard_DefineAlloc_HeaderFile
+
 
 // Macro to override new and delete operators for arrays.
 // Defined to empty for old SUN compiler
@@ -32,7 +33,7 @@
    }
 # endif
 
-// Macro to override placement new and placement delete operators. 
+// Macro to override placement new and placement delete operators.
 // For Borland C and old SUN compilers do not define placement delete
 // as it is not supported.
 # if defined(__BORLANDC__) || (defined(__SUNPRO_CC) && (__SUNPRO_CC <= 0x530))
@@ -41,7 +42,7 @@
    {                                                                   \
      return theAddress;                                                \
    }
-# else 
+# else
 #  define DEFINE_STANDARD_ALLOC_PLACEMENT                              \
    void* operator new (size_t, void* theAddress)                       \
    {                                                                   \
@@ -69,7 +70,7 @@
 #ifndef WORKAROUND_SUNPRO_NEW_PLACEMENT
 #define WORKAROUND_SUNPRO_NEW_PLACEMENT
 #if defined(__SUNPRO_CC) && (__SUNPRO_CC <= 0x420)
-inline void* operator new(size_t,void* anAddress) 
+inline void* operator new(size_t,void* anAddress)
 {
   return anAddress;
 }

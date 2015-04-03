@@ -1,7 +1,7 @@
 project(TKMesh)
 
 if (WIN32)
-  list( APPEND TKMesh_PRECOMPILED_DEFS "-D__BRepMesh_DLL" )
+#  list( APPEND TKMesh_PRECOMPILED_DEFS "-D__BRepMesh_DLL" )
   string( REGEX REPLACE ";" " " TKMesh_PRECOMPILED_DEFS "${TKMesh_PRECOMPILED_DEFS}")
 endif()
 
@@ -284,7 +284,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKMesh)
- add_library( TKMesh SHARED ${TKMesh_USED_SRCFILES} )
+ add_library( TKMesh STATIC ${TKMesh_USED_SRCFILES} )
 
  set_property(TARGET TKMesh PROPERTY FOLDER ModelingAlgorithms)
 
@@ -303,3 +303,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKMesh)
  include_directories( ${TKMesh_COMPILER_DIRECTORIES} )
  target_link_libraries( TKMesh ${TKMesh_USED_LIBS} )
 endif()
+

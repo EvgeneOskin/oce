@@ -41,7 +41,7 @@ class FSD_BinaryFile  : public Storage_BaseDriver
 public:
 
   DEFINE_STANDARD_ALLOC
-
+ 
   
   Standard_EXPORT FSD_BinaryFile();
   

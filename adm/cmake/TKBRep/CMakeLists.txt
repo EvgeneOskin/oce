@@ -1,14 +1,14 @@
 project(TKBRep)
 
 if (WIN32)
-  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__TopoDS_DLL" )
-  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__TopExp_DLL" )
-  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__TopTools_DLL" )
-  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__BRep_DLL" )
-  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__BRepLProp_DLL" )
-  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__BRepAdaptor_DLL" )
-  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__BRepTools_DLL" )
-  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__BinTools_DLL" )
+#  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__TopoDS_DLL" )
+#  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__TopExp_DLL" )
+#  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__TopTools_DLL" )
+#  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__BRep_DLL" )
+#  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__BRepLProp_DLL" )
+#  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__BRepAdaptor_DLL" )
+#  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__BRepTools_DLL" )
+#  list( APPEND TKBRep_PRECOMPILED_DEFS "-D__BinTools_DLL" )
   string( REGEX REPLACE ";" " " TKBRep_PRECOMPILED_DEFS "${TKBRep_PRECOMPILED_DEFS}")
 endif()
 
@@ -1738,7 +1738,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKBRep)
- add_library( TKBRep SHARED ${TKBRep_USED_SRCFILES} )
+ add_library( TKBRep STATIC ${TKBRep_USED_SRCFILES} )
 
  set_property(TARGET TKBRep PROPERTY FOLDER ModelingData)
 
@@ -1757,3 +1757,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKBRep)
  include_directories( ${TKBRep_COMPILER_DIRECTORIES} )
  target_link_libraries( TKBRep ${TKBRep_USED_LIBS} )
 endif()
+

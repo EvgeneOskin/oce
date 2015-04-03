@@ -50,7 +50,7 @@ Standard_Integer OSD_Error::Error()const{
  return(extCode);
 }
 
- 
+
 void OSD_Error::Perror() {
  TCollection_AsciiString buffer;
 
@@ -76,7 +76,7 @@ void OSD_Error::Perror() {
   case EBADMSG:
    switch (myCode){
     case OSD_WFile:
-     buffer += 
+     buffer +=
      "The message waiting to be read on stream is not a data message";
      extCode = ERR_FBADMSG;
      break;
@@ -86,7 +86,7 @@ void OSD_Error::Perror() {
    break;
 #endif
 
-  case EINVAL: 
+  case EINVAL:
    switch (myCode){
     case OSD_WFileNode:
       buffer += "Can't unlink '.' or '..'";
@@ -150,7 +150,7 @@ void OSD_Error::Perror() {
      break;
    }
    break;
-  case EACCES: 
+  case EACCES:
     buffer += "Permission denied";
     extCode = ERR_ACCESS;
     break;
@@ -174,7 +174,7 @@ void OSD_Error::Perror() {
       break;
    }
    break;
-  case EPERM: 
+  case EPERM:
    switch (myCode){
     case OSD_WPackage:
      buffer += "Permission denied";
@@ -184,7 +184,7 @@ void OSD_Error::Perror() {
      buffer += "Permission denied or can't unlink directory";
      extCode = ERR_FPERM;
      break;
-    default : 
+    default :
      buffer += "abnormal error : you modified OSD library";
      extCode = ERR_PERM;
      break;
@@ -306,7 +306,7 @@ void OSD_Error::Perror() {
    switch (myCode){
     case OSD_WFile:
      buffer += "Exceed process's file size limit or the maximum file size";
-     extCode = ERR_FFBIG; 
+     extCode = ERR_FFBIG;
      break;
     default:
      break;
@@ -316,12 +316,12 @@ void OSD_Error::Perror() {
    buffer += "operation breaked by a signal";
    extCode = ERR_INTR;
    break;
-  case ENOMEM: 
+  case ENOMEM:
    buffer += "Not enough memory";
    extCode = ERR_NOMEM;
    break;
-  case EMFILE : 
-   switch(myCode){   
+  case EMFILE :
+   switch(myCode){
     case OSD_WFile :
        buffer += "Too many file descriptors are currently in use by this process";
        extCode = ERR_FMFILE;
@@ -401,7 +401,7 @@ void OSD_Error::Perror() {
    break;
 #endif
 
-  case EEXIST: 
+  case EEXIST:
    switch(myCode){
     case OSD_WFileNode:
      buffer += "Directory not empty";
@@ -417,7 +417,7 @@ void OSD_Error::Perror() {
      break;
    }
    break;
-  case E2BIG: 
+  case E2BIG:
    buffer += "Too many Semaphore/Shared memory for a process.";
    buffer += "Reconfigure Kernel with greater values";
    extCode = ERR_TOOBIG;
@@ -562,7 +562,7 @@ static ERROR_TABLE fileNodeErrorTable[] = {
 
 static Standard_Integer _get_comm_error ( DWORD );
 
-OSD_Error :: OSD_Error () : 
+OSD_Error :: OSD_Error () :
    myCode((OSD_WhoAmI)0),
    extCode(0)
 {
@@ -578,11 +578,11 @@ void OSD_Error :: Perror () {
  Standard_CString   ptr;
 
  if ( fPrefix ) {
- 
+
   lstrcpy (  buff, "Error ( "  );
 
   switch ( myCode ) {
-  
+
    case OSD_WDirectoryIterator:
 
     ptr = "OSD_DirectoryIterator";
@@ -602,7 +602,7 @@ void OSD_Error :: Perror () {
    break;
 
    case OSD_WFile:
-  
+
     ptr = "OSD_File";
 
    break;
@@ -652,7 +652,7 @@ void OSD_Error :: Perror () {
   lstrcat ( buff, ptr );
   lstrcat (  buff, " )"  );
   ( *errorStream ) << buff;
- 
+
  }  // end if ( fPrefix . . . )
 
  TCollection_ExtendedString aMessageW(myMessage);
@@ -673,7 +673,7 @@ void OSD_Error :: SetValue (
  myMessage = Message;
 
  switch ( From ) {
- 
+
   case OSD_WDirectory:
 
    for ( i = 0; i < DIR_ERR_TABLE_SIZE; ++i )
@@ -703,7 +703,7 @@ void OSD_Error :: SetValue (
   if ( i == FILE_ERR_TABLE_SIZE ) extCode = _get_comm_error ( Errcode );
 
   break;
- 
+
   case OSD_WFileNode:
 
    for ( i = 0; i < FILE_NODE_ERR_TABLE_SIZE; ++i )
@@ -741,7 +741,7 @@ Standard_Boolean OSD_Error :: Failed () const {
 
 void OSD_Error :: Reset () {
 
- myErrno = ERROR_SUCCESS; 
+ myErrno = ERROR_SUCCESS;
  if (errorStream != NULL)
  {
    ( *errorStream ).clear ();
@@ -793,4 +793,31 @@ static Standard_Integer _get_comm_error ( DWORD dwCode ) {
 
 }  // end _get_comm_error
 
+void _osd_wnt_set_error ( OSD_Error& err, OSD_WhoAmI who, ... ) {
+
+ DWORD              errCode;
+ Standard_Character buffer[ 2048 ];
+ va_list            arg_ptr;
+
+ va_start ( arg_ptr, err );
+
+ errCode = GetLastError ();
+
+ if (  !FormatMessage (
+         FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
+         0, errCode, MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ),
+         buffer, 2048, &arg_ptr
+        )
+ ) {
+
+  sprintf ( buffer, "error code %d", (Standard_Integer)errCode );
+  SetLastError ( errCode );
+
+ }  // end if
+
+ err.SetValue ( errCode, who, buffer );
+
+ va_end ( arg_ptr );
+
+}  // end _set_error
 #endif

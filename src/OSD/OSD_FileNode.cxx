@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _WIN32
+#if !defined(_WIN32) || (defined(__CYGWIN32__) || defined(__MINGW32__))
 
 //----------------------------------------------------------------------------
 //------------------- Linux Sources of OSD_FileNode --------------------------
@@ -72,7 +72,7 @@ void OSD_FileNode::SetPath (const OSD_Path& Name){
 
 
 // Test if specified file/directory exists
- 
+
 Standard_Boolean  OSD_FileNode::Exists(){
 int status;
 
@@ -85,7 +85,7 @@ int status;
  TCollection_AsciiString aBuffer;
  myPath.SystemName ( aBuffer );
  status = access ( aBuffer.ToCString() , F_OK );
- 
+
  if (status == 0) return (Standard_True);
    else return ( Standard_False );
 }
@@ -118,7 +118,7 @@ void  OSD_FileNode::Remove(){
      myError.SetValue (errno, Iam, "Remove");
      return;
    }
-  
+
  if (  S_ISDIR(stat_buf.st_mode))  {
    // DIRECTORY
 
@@ -127,13 +127,16 @@ void  OSD_FileNode::Remove(){
        myError.SetValue (errno, Iam, "Remove");
        return;
      }
-   return; 
+   return;
 
  }
- else if  (  S_ISREG(stat_buf.st_mode) || S_ISLNK(stat_buf.st_mode) ||
-             S_ISFIFO(stat_buf.st_mode)   )  { 
-   
-   if (unlink ( aBuffer.ToCString()) == -1) 
+ else if  (  S_ISREG(stat_buf.st_mode) ||
+#if !(defined(__CYGWIN32__) || defined(__MINGW32__))
+             S_ISLNK(stat_buf.st_mode) ||
+#endif
+             S_ISFIFO(stat_buf.st_mode)   )  {
+
+   if (unlink ( aBuffer.ToCString()) == -1)
      myError.SetValue (errno, Iam, "Remove");
    return;
  }
@@ -172,7 +175,13 @@ int static copy_file( const char* src, const char* trg )
   if ( fds <0 )
     return errno;
 
-  int fdo = open( trg, O_WRONLY|O_TRUNC| O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+  int fdo = open( trg,
+                  O_WRONLY|O_TRUNC| O_CREAT,
+                  S_IRUSR|S_IWUSR
+#if !(defined(__CYGWIN32__) || defined(__MINGW32__))
+                  |S_IRGRP|S_IROTH
+#endif
+                  );
   if ( fdo <0 )
   {
     err = errno;
@@ -248,6 +257,7 @@ int s,u,g,w;
  if (myStat.st_mode & S_IWUSR)  u |= OSD_W;
  if (myStat.st_mode & S_IXUSR)  u |= OSD_X;
 
+#if !(defined(__CYGWIN32__) || defined(__MINGW32__))
  if (myStat.st_mode & S_IRGRP)  g |= OSD_R;
  if (myStat.st_mode & S_IWGRP)  g |= OSD_W;
  if (myStat.st_mode & S_IXGRP)  g |= OSD_X;
@@ -255,7 +265,7 @@ int s,u,g,w;
  if (myStat.st_mode & S_IROTH)  w |= OSD_R;
  if (myStat.st_mode & S_IWOTH)  w |= OSD_W;
  if (myStat.st_mode & S_IXOTH)  w |= OSD_X;
-
+#endif
  s = g;
  thisProt.SetValues ((OSD_SingleProtection)s,
                      (OSD_SingleProtection)u,
@@ -347,7 +357,7 @@ Quantity_Date  OSD_FileNode::CreationMoment(){
    time_t aTime = (time_t)buffer.st_ctime;
    decode = localtime (&aTime);
    result.SetValues (decode->tm_mon+1, decode->tm_mday, decode->tm_year+1900,
-		     decode->tm_hour, decode->tm_min, decode->tm_sec , 0,0);
+             decode->tm_hour, decode->tm_min, decode->tm_sec , 0,0);
  }
  else
    result.SetValues (1, 1, 1979, 0, 0, 0, 0, 0) ;
@@ -375,7 +385,7 @@ Quantity_Date  OSD_FileNode::AccessMoment(){
    time_t aTime = (time_t)buffer.st_ctime;
    decode = localtime (&aTime);
    result.SetValues (decode->tm_mon+1, decode->tm_mday, decode->tm_year+1900,
-		     decode->tm_hour, decode->tm_min, decode->tm_sec, 0,0 );
+             decode->tm_hour, decode->tm_min, decode->tm_sec, 0,0 );
  }
  else
    result.SetValues (1, 1, 1979, 0, 0, 0, 0, 0) ;
@@ -438,7 +448,7 @@ static void __fastcall _test_raise ( TCollection_AsciiString, Standard_CString )
 //purpose  : Empty Constructor
 //=======================================================================
 
-OSD_FileNode::OSD_FileNode () 
+OSD_FileNode::OSD_FileNode ()
 {
 }
 
@@ -454,7 +464,7 @@ OSD_FileNode::OSD_FileNode ( const OSD_Path& Name )
 
 //=======================================================================
 //function : Path
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void OSD_FileNode::Path ( OSD_Path& Name ) const {
@@ -465,7 +475,7 @@ void OSD_FileNode::Path ( OSD_Path& Name ) const {
 
 //=======================================================================
 //function : SetPath
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void OSD_FileNode::SetPath ( const OSD_Path& Name ) {
@@ -476,7 +486,7 @@ void OSD_FileNode::SetPath ( const OSD_Path& Name ) {
 
 //=======================================================================
 //function : Exists
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Standard_Boolean OSD_FileNode::Exists () {
@@ -492,11 +502,11 @@ Standard_Boolean OSD_FileNode::Exists () {
  // make wide character string from UTF-8
  TCollection_ExtendedString fNameW(fName);
  if (  GetFileAttributesW ( (const wchar_t*) fNameW.ToExtString ()  ) == 0xFFFFFFFF  ) {
- 
+
   if (  GetLastError () != ERROR_FILE_NOT_FOUND  )
 
    _osd_wnt_set_error (  myError, OSD_WFileNode, fName.ToCString ()  );
- 
+
  } else
 
   retVal = Standard_True;
@@ -507,7 +517,7 @@ Standard_Boolean OSD_FileNode::Exists () {
 
 //=======================================================================
 //function : Remove
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void OSD_FileNode::Remove () {
@@ -532,7 +542,7 @@ void OSD_FileNode::Remove () {
   case FLAG_DIRECTORY:
 
 
-// LD : Suppression de l'appel a DeleteDirectory pour 
+// LD : Suppression de l'appel a DeleteDirectory pour
 //      ne pas detruire un repertoire no vide.
 
    if (   !RemoveDirectoryW ( (const wchar_t*) fNameW.ToExtString ()  )   )
@@ -552,7 +562,7 @@ void OSD_FileNode::Remove () {
 
 //=======================================================================
 //function : Move
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void OSD_FileNode::Move ( const OSD_Path& NewPath ) {
@@ -577,7 +587,7 @@ void OSD_FileNode::Move ( const OSD_Path& NewPath ) {
                      MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED
                      )
        )
- 
+
      _osd_wnt_set_error ( myError, OSD_WFileNode,
                           fName.ToCString (), fNameDst.ToCString ()  );
   break;
@@ -588,7 +598,7 @@ void OSD_FileNode::Move ( const OSD_Path& NewPath ) {
             (const wchar_t*) fNameW.ToExtString (), (const wchar_t*) fNameDstW.ToExtString ()
            )
    )
- 
+
     _osd_wnt_set_error ( myError, OSD_WFileNode,
                          fName.ToCString (), fNameDst.ToCString ()  );
 
@@ -605,7 +615,7 @@ void OSD_FileNode::Move ( const OSD_Path& NewPath ) {
 
 //=======================================================================
 //function : Copy
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void OSD_FileNode::Copy ( const OSD_Path& ToPath ) {
@@ -637,7 +647,7 @@ void OSD_FileNode::Copy ( const OSD_Path& ToPath ) {
             (const wchar_t*)fNameW.ToExtString (), (const wchar_t*)fNameDstW.ToExtString ()
           )
    )
- 
+
     _osd_wnt_set_error (
      myError, OSD_WFileNode, fName.ToCString (), fNameDst.ToCString ()
     );
@@ -655,7 +665,7 @@ void OSD_FileNode::Copy ( const OSD_Path& ToPath ) {
 
 //=======================================================================
 //function : Protection
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 OSD_Protection OSD_FileNode::Protection () {
@@ -678,7 +688,7 @@ OSD_Protection OSD_FileNode::Protection () {
           pSD, retVal,
           _get_file_type (fName.ToCString(), INVALID_HANDLE_VALUE) == FLAG_DIRECTORY)
  )
-   
+
    _osd_wnt_set_error ( myError, OSD_WFileNode );
 
  if ( pSD != NULL )
@@ -691,7 +701,7 @@ OSD_Protection OSD_FileNode::Protection () {
 
 //=======================================================================
 //function : SetProtection
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void OSD_FileNode::SetProtection ( const OSD_Protection& Prot ) {
@@ -710,12 +720,12 @@ void OSD_FileNode::SetProtection ( const OSD_Protection& Prot ) {
         FLAG_DIRECTORY,
         (wchar_t *)fNameW.ToExtString ()
        );
- 
+
  if ( pSD == NULL || !SetFileSecurityW (
                        (const wchar_t*) fNameW.ToExtString (), DACL_SECURITY_INFORMATION, pSD
                       )
  )
-  
+
   _osd_wnt_set_error (  myError, OSD_WFileNode, fName.ToCString ()  );
 
  if ( pSD != NULL )
@@ -726,7 +736,7 @@ void OSD_FileNode::SetProtection ( const OSD_Protection& Prot ) {
 
 //=======================================================================
 //function : AccessMoment
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Quantity_Date OSD_FileNode::AccessMoment () {
@@ -767,7 +777,7 @@ Quantity_Date OSD_FileNode::AccessMoment () {
 
 //=======================================================================
 //function : CreationMoment
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Quantity_Date OSD_FileNode::CreationMoment () {
@@ -783,8 +793,8 @@ Quantity_Date OSD_FileNode::CreationMoment () {
  TEST_RAISE(  "CreationMoment"  );
 
 // if (   _get_file_time (  fName.ToCString (), &stCreationMoment, FALSE  )   )
- if ( _get_file_time ( fNameW.ToExtString (), &stCreationSystemMoment, TRUE  )   ) 
-//POP 
+ if ( _get_file_time ( fNameW.ToExtString (), &stCreationSystemMoment, TRUE  )   )
+//POP
 {
   SYSTEMTIME * aSysTime = &stCreationMoment;
   BOOL aFlag = SystemTimeToTzSpecificLocalTime (NULL,
@@ -808,7 +818,7 @@ Quantity_Date OSD_FileNode::CreationMoment () {
 
 //=======================================================================
 //function : UserId
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Standard_Integer OSD_FileNode::UserId () {
@@ -832,7 +842,7 @@ Standard_Integer OSD_FileNode::UserId () {
         GetSecurityDescriptorOwner ( pSD, &pSIDowner, &fDefaulted ) &&
         pSIDowner != NULL
  )
- 
+
   retVal = CopySidEx ( pSIDowner );
 
  else
@@ -842,14 +852,14 @@ Standard_Integer OSD_FileNode::UserId () {
  if ( pSD != NULL )
 
   FreeFileSecurity ( pSD );
- 
+
  return ( Standard_Integer )retVal;
 
 }  // end OSD_FileNode :: UserId
 
 //=======================================================================
 //function : GroupId
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Standard_Integer OSD_FileNode::GroupId () {
@@ -883,7 +893,7 @@ Standard_Integer OSD_FileNode::GroupId () {
 
 //=======================================================================
 //function : Failed
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Standard_Boolean OSD_FileNode::Failed () const {
@@ -894,7 +904,7 @@ Standard_Boolean OSD_FileNode::Failed () const {
 
 //=======================================================================
 //function : Reset
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void OSD_FileNode::Reset () {
@@ -905,7 +915,7 @@ void OSD_FileNode::Reset () {
 
 //=======================================================================
 //function : Perror
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void OSD_FileNode::Perror () {
@@ -916,7 +926,7 @@ void OSD_FileNode::Perror () {
 
 //=======================================================================
 //function : Error
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Standard_Integer OSD_FileNode::Error () const {
@@ -924,34 +934,6 @@ Standard_Integer OSD_FileNode::Error () const {
  return myError.Error ();
 
 }  // end OSD_FileNode :: Error
-
-void _osd_wnt_set_error ( OSD_Error& err, OSD_WhoAmI who, ... ) {
-
- DWORD              errCode;
- Standard_Character buffer[ 2048 ];
- va_list            arg_ptr;
-
- va_start ( arg_ptr, err );
-
- errCode = GetLastError ();
-
- if (  !FormatMessage (
-         FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
-         0, errCode, MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ),
-         buffer, 2048, &arg_ptr
-        )
- ) {
- 
-  sprintf ( buffer, "error code %d", (Standard_Integer)errCode );
-  SetLastError ( errCode );
-
- }  // end if
-
- err.SetValue ( errCode, who, buffer );
-
- va_end ( arg_ptr );
-
-}  // end _set_error
 
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
 #define __try
@@ -987,11 +969,11 @@ static BOOL __fastcall _get_file_time (
  }  // end __try
 
  __finally {
- 
+
   if ( hFile != INVALID_HANDLE_VALUE )
 
    CloseHandle ( hFile );
- 
+
  }  // end __finally
 
 #ifdef VAC
@@ -1013,13 +995,13 @@ static void __fastcall _test_raise ( TCollection_AsciiString fName, Standard_CSt
  Standard_Character buff[ 64 ];
 
  if (  fName.IsEmpty ()  ) {
- 
+
   strcpy (  buff, "OSD_FileNode :: "  );
   strcat (  buff, str );
   strcat (  buff, " (): wrong access"  );
 
   Standard_ProgramError :: Raise ( buff );
- 
+
  }  // end if
 
 }  // end _test_raise

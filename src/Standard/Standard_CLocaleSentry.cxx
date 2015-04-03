@@ -16,8 +16,8 @@
 #include <Standard_CLocaleSentry.hxx>
 
 #include <Standard_TypeDef.hxx>
-
 #include <cstring>
+#include <locale.h>
 
 #if !defined(__ANDROID__)
 
@@ -30,10 +30,10 @@ namespace
   public:
 
     CLocalePtr()
-    #ifdef HAVE_XLOCALE_H
+    #if defined(_WIN32)
+    : myLocale (/*_create_locale (LC_ALL, "C")*/)
+    #elif defined(HAVE_XLOCALE_H)
     : myLocale (newlocale (LC_ALL_MASK, "C", NULL))
-    #elif defined(_WIN32)
-    : myLocale (_create_locale (LC_ALL, "C"))
     #else
     : myLocale (NULL)
     #endif
@@ -41,10 +41,10 @@ namespace
 
     ~CLocalePtr()
     {
-    #ifdef HAVE_XLOCALE_H
-      freelocale (myLocale);
-    #elif defined(_WIN32)
-      _free_locale (myLocale);
+    #if defined(_WIN32)
+//        _free_locale (myLocale);
+    #elif defined(HAVE_XLOCALE_H)
+        freelocale (myLocale);
     #endif
     }
 

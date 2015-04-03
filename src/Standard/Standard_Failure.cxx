@@ -65,20 +65,20 @@ static Handle(Standard_Failure) RaisedError;
 //
 // ------------------------------------------------------------------
 Standard_Failure::Standard_Failure ()
-: myMessage(NULL) 
+: myMessage(NULL)
 {
 }
 
 // ------------------------------------------------------------------
 // Create returns mutable Failure;
 // ------------------------------------------------------------------
-Standard_Failure::Standard_Failure (const Standard_CString AString) 
+Standard_Failure::Standard_Failure (const Standard_CString AString)
 :  myMessage(NULL)
 {
   myMessage = allocate_message(AString);
 }
 
-Standard_Failure::Standard_Failure (const Standard_Failure& theFailure) 
+Standard_Failure::Standard_Failure (const Standard_Failure& theFailure)
 : Standard_Transient(theFailure)
 {
   myMessage = copy_message(theFailure.myMessage);
@@ -99,7 +99,7 @@ void Standard_Failure::SetMessageString(const Standard_CString AString)
 // ------------------------------------------------------------------
 // Caught (myclass) returns mutable Failure raises NoSuchObject ;
 // ------------------------------------------------------------------
-Handle(Standard_Failure) Standard_Failure::Caught() 
+Handle(Standard_Failure) Standard_Failure::Caught()
 {
 #ifdef NO_CXX_EXCEPTION
   return Standard_ErrorHandler::LastCaughtError();
@@ -111,8 +111,8 @@ Handle(Standard_Failure) Standard_Failure::Caught()
 // ------------------------------------------------------------------
 // Raise (myclass; aMessage: CString = "") ;
 // ------------------------------------------------------------------
-void Standard_Failure::Raise (const Standard_CString AString) 
-{ 
+void Standard_Failure::Raise (const Standard_CString AString)
+{
   Handle(Standard_Failure) E = new Standard_Failure()  ;
   E->Reraise (AString) ;
 }
@@ -120,8 +120,8 @@ void Standard_Failure::Raise (const Standard_CString AString)
 // ------------------------------------------------------------------
 // Raise(myclass; aReason: in out SStream) ;
 // ------------------------------------------------------------------
-void Standard_Failure::Raise (const Standard_SStream& AReason) 
-{ 
+void Standard_Failure::Raise (const Standard_SStream& AReason)
+{
   Handle(Standard_Failure) E = new Standard_Failure();
   E->Reraise (AReason);
 }
@@ -129,19 +129,19 @@ void Standard_Failure::Raise (const Standard_SStream& AReason)
 // ------------------------------------------------------------------
 // Reraise (me: mutable; aMessage: CString) ;
 // ------------------------------------------------------------------
-void Standard_Failure::Reraise (const Standard_CString AString) 
+void Standard_Failure::Reraise (const Standard_CString AString)
 {
   SetMessageString(AString);
   Reraise();
 }
 
-void Standard_Failure::Reraise (const Standard_SStream& AReason) 
+void Standard_Failure::Reraise (const Standard_SStream& AReason)
 {
   SetMessageString(AReason.str().c_str());
   Reraise();
 }
 
-void Standard_Failure::Reraise () 
+void Standard_Failure::Reraise ()
 {
 #ifdef NO_CXX_EXCEPTION
   Standard_ErrorHandler::Error (this);
@@ -152,7 +152,7 @@ void Standard_Failure::Reraise ()
 #endif
 }
 
-void Standard_Failure::Jump() const 
+void Standard_Failure::Jump() const
 {
 #if defined (NO_CXX_EXCEPTION) || defined (OCC_CONVERT_SIGNALS)
   Standard_ErrorHandler::Error (this);
@@ -179,10 +179,10 @@ void Standard_Failure::Throw() const
 // ------------------------------------------------------------------
 void Standard_Failure::Print (Standard_OStream& AStream) const
 {
-if(myMessage){ 
-    AStream << DynamicType() << ": " << GetMessageString(); 
- } 
- else { 
+if(myMessage){
+    AStream << DynamicType() << ": " << GetMessageString();
+ }
+ else {
     AStream << DynamicType();
  }
 }

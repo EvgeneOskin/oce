@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
+#ifndef _WIN32
 
 #include <OSD_Process.ixx>
 #include <OSD_WhoAmI.hxx>
@@ -32,7 +32,7 @@ OSD_Process::OSD_Process(){
 
 
 void OSD_Process::Spawn (const TCollection_AsciiString& cmd,
-			 const Standard_Boolean /*ShowWindow*/)
+             const Standard_Boolean /*ShowWindow*/)
 {
  system(cmd.ToCString());
 }
@@ -88,7 +88,7 @@ Standard_Integer OSD_Process::UserId(){
 
 TCollection_AsciiString OSD_Process::UserName(){
  struct passwd *infos;
- infos = getpwuid(getuid()); 
+ infos = getpwuid(getuid());
  TCollection_AsciiString result=infos->pw_name;
 
  return(result);
@@ -208,7 +208,7 @@ OSD_Process :: OSD_Process () {
 }  // end constructor
 
 void OSD_Process :: Spawn ( const TCollection_AsciiString& cmd ,
-			    const Standard_Boolean ShowWindow /* = Standard_True */) {
+                const Standard_Boolean ShowWindow /* = Standard_True */) {
 
  STARTUPINFO         si;
  PROCESS_INFORMATION pi;
@@ -221,8 +221,8 @@ void OSD_Process :: Spawn ( const TCollection_AsciiString& cmd ,
  //---> Reason : to allow to hide the window
  if ( !ShowWindow )
  {
-	 si.dwFlags		= STARTF_USESHOWWINDOW;
-	 si.wShowWindow	= SW_HIDE;	
+     si.dwFlags		= STARTF_USESHOWWINDOW;
+     si.wShowWindow	= SW_HIDE;
  }
  //<--- End Added by Stephane Routelous ( stephane.routelous@altavista.net )	[16.03.01]
  //============================================
@@ -235,13 +235,13 @@ void OSD_Process :: Spawn ( const TCollection_AsciiString& cmd ,
   _osd_wnt_set_error ( myError, OSD_WProcess );
 
  else {
- 
+
   CloseHandle ( pi.hThread );
 
   WaitForSingleObject ( pi.hProcess, INFINITE );
 
   CloseHandle ( pi.hProcess );
- 
+
  }  // end else
 
 }  // end OSD_Process :: Spawn
@@ -293,22 +293,22 @@ Standard_Integer OSD_Process :: UserId () {
 
 }  // end OSD_Process :: UserId
 
-TCollection_AsciiString OSD_Process :: UserName () 
+TCollection_AsciiString OSD_Process :: UserName ()
 {
-	Standard_PCharacter pBuff = new char[UNLEN + 1];
-	DWORD                   dwSize = UNLEN + 1;
-	TCollection_AsciiString retVal;
-	if (  !GetUserName ( pBuff, &dwSize )  )
-	{
-		_osd_wnt_set_error ( myError, OSD_WProcess );
-	}
-	else
-	{
-		TCollection_AsciiString theTmpUserName(pBuff,(int)dwSize -1 );
-		retVal = theTmpUserName;
-	}
-	delete [] pBuff;
-	return retVal;
+    Standard_PCharacter pBuff = new char[UNLEN + 1];
+    DWORD                   dwSize = UNLEN + 1;
+    TCollection_AsciiString retVal;
+    if (  !GetUserName ( pBuff, &dwSize )  )
+    {
+        _osd_wnt_set_error ( myError, OSD_WProcess );
+    }
+    else
+    {
+        TCollection_AsciiString theTmpUserName(pBuff,(int)dwSize -1 );
+        retVal = theTmpUserName;
+    }
+    delete [] pBuff;
+    return retVal;
 }  // end OSD_Process :: UserName
 
 Standard_Boolean OSD_Process :: IsSuperUser () {
@@ -331,18 +331,18 @@ Standard_Boolean OSD_Process :: IsSuperUser () {
   _osd_wnt_set_error ( myError, OSD_WProcess );
 
  else {
- 
+
   pSIDadmin = AdminSid ();
 
   for ( int i = 0; i < ( int )pTKgroups -> GroupCount; ++i )
 
    if (  EqualSid ( pTKgroups -> Groups[ i ].Sid, pSIDadmin )  ) {
-   
+
     retVal = TRUE;
     break;
-   
+
    }  // end if
- 
+
  }  // end else
 
  if ( hProcessToken != INVALID_HANDLE_VALUE ) CloseHandle ( hProcessToken );
@@ -373,7 +373,7 @@ OSD_Path OSD_Process :: CurrentDirectory () {
   }
   else
     _osd_wnt_set_error ( myError, OSD_WProcess );
- 
+
   delete[] pBuff;
   return anCurrentDirectory;
 }  // end OSD_Process :: CurrentDirectory

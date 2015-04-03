@@ -1,8 +1,8 @@
 project(TKFeat)
 
 if (WIN32)
-  list( APPEND TKFeat_PRECOMPILED_DEFS "-D__LocOpe_DLL" )
-  list( APPEND TKFeat_PRECOMPILED_DEFS "-D__BRepFeat_DLL" )
+#  list( APPEND TKFeat_PRECOMPILED_DEFS "-D__LocOpe_DLL" )
+#  list( APPEND TKFeat_PRECOMPILED_DEFS "-D__BRepFeat_DLL" )
   string( REGEX REPLACE ";" " " TKFeat_PRECOMPILED_DEFS "${TKFeat_PRECOMPILED_DEFS}")
 endif()
 
@@ -544,7 +544,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKFeat)
- add_library( TKFeat SHARED ${TKFeat_USED_SRCFILES} )
+ add_library( TKFeat STATIC ${TKFeat_USED_SRCFILES} )
 
  set_property(TARGET TKFeat PROPERTY FOLDER ModelingAlgorithms)
 
@@ -563,3 +563,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKFeat)
  include_directories( ${TKFeat_COMPILER_DIRECTORIES} )
  target_link_libraries( TKFeat ${TKFeat_USED_LIBS} )
 endif()
+

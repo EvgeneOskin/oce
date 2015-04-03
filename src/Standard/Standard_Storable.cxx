@@ -14,9 +14,6 @@
 
 #include <Standard_Storable.ixx>
 
-void Standard_Storable::Delete()
-{}
-
 //========================================================================
 Standard_Integer Standard_Storable::HashCode(const Standard_Integer Upper)const
 {

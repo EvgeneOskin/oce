@@ -1,2 +1,2 @@
-#include <TColStd_HArray1OfReal.hxx>
 #include <math_ComputeGaussPointsAndWeights.hxx>
+#include <TColStd_HArray1OfReal.hxx>

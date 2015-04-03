@@ -1,7 +1,7 @@
 project(TKXMesh)
 
 if (WIN32)
-  list( APPEND TKXMesh_PRECOMPILED_DEFS "-D__XBRepMesh_DLL" )
+#  list( APPEND TKXMesh_PRECOMPILED_DEFS "-D__XBRepMesh_DLL" )
   string( REGEX REPLACE ";" " " TKXMesh_PRECOMPILED_DEFS "${TKXMesh_PRECOMPILED_DEFS}")
 endif()
 
@@ -73,7 +73,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKXMesh)
- add_library( TKXMesh SHARED ${TKXMesh_USED_SRCFILES} )
+ add_library( TKXMesh STATIC ${TKXMesh_USED_SRCFILES} )
 
  set_property(TARGET TKXMesh PROPERTY FOLDER ModelingAlgorithms)
 
@@ -92,3 +92,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKXMesh)
  include_directories( ${TKXMesh_COMPILER_DIRECTORIES} )
  target_link_libraries( TKXMesh ${TKXMesh_USED_LIBS} )
 endif()
+

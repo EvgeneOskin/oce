@@ -1,13 +1,13 @@
 project(TKG2d)
 
 if (WIN32)
-  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__Geom2d_DLL" )
-  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__LProp_DLL" )
-  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__TColGeom2d_DLL" )
-  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__Adaptor2d_DLL" )
-  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__Geom2dLProp_DLL" )
-  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__Geom2dAdaptor_DLL" )
-  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__GProp_DLL" )
+#  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__Geom2d_DLL" )
+#  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__LProp_DLL" )
+#  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__TColGeom2d_DLL" )
+#  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__Adaptor2d_DLL" )
+#  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__Geom2dLProp_DLL" )
+#  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__Geom2dAdaptor_DLL" )
+#  list( APPEND TKG2d_PRECOMPILED_DEFS "-D__GProp_DLL" )
   string( REGEX REPLACE ";" " " TKG2d_PRECOMPILED_DEFS "${TKG2d_PRECOMPILED_DEFS}")
 endif()
 
@@ -810,7 +810,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKG2d)
- add_library( TKG2d SHARED ${TKG2d_USED_SRCFILES} )
+ add_library( TKG2d STATIC ${TKG2d_USED_SRCFILES} )
 
  set_property(TARGET TKG2d PROPERTY FOLDER ModelingData)
 
@@ -829,3 +829,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKG2d)
  include_directories( ${TKG2d_COMPILER_DIRECTORIES} )
  target_link_libraries( TKG2d ${TKG2d_USED_LIBS} )
 endif()
+

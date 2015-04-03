@@ -1,10 +1,10 @@
 project(TKPrim)
 
 if (WIN32)
-  list( APPEND TKPrim_PRECOMPILED_DEFS "-D__BRepPrim_DLL" )
-  list( APPEND TKPrim_PRECOMPILED_DEFS "-D__BRepSweep_DLL" )
-  list( APPEND TKPrim_PRECOMPILED_DEFS "-D__Sweep_DLL" )
-  list( APPEND TKPrim_PRECOMPILED_DEFS "-D__BRepPrimAPI_DLL" )
+#  list( APPEND TKPrim_PRECOMPILED_DEFS "-D__BRepPrim_DLL" )
+#  list( APPEND TKPrim_PRECOMPILED_DEFS "-D__BRepSweep_DLL" )
+#  list( APPEND TKPrim_PRECOMPILED_DEFS "-D__Sweep_DLL" )
+#  list( APPEND TKPrim_PRECOMPILED_DEFS "-D__BRepPrimAPI_DLL" )
   string( REGEX REPLACE ";" " " TKPrim_PRECOMPILED_DEFS "${TKPrim_PRECOMPILED_DEFS}")
 endif()
 
@@ -450,7 +450,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKPrim)
- add_library( TKPrim SHARED ${TKPrim_USED_SRCFILES} )
+ add_library( TKPrim STATIC ${TKPrim_USED_SRCFILES} )
 
  set_property(TARGET TKPrim PROPERTY FOLDER ModelingAlgorithms)
 
@@ -469,3 +469,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKPrim)
  include_directories( ${TKPrim_COMPILER_DIRECTORIES} )
  target_link_libraries( TKPrim ${TKPrim_USED_LIBS} )
 endif()
+

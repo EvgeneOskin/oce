@@ -63,7 +63,7 @@ void OSD_OpenFileBuf(std::filebuf& theBuff,
                      const char* theName,
                      const std::ios_base::openmode theMode)
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
   // file name is treated as UTF-8 string and converted to UTF-16 one
   const TCollection_ExtendedString aFileNameW (theName, Standard_True);
   theBuff.open ((const wchar_t* )aFileNameW.ToExtString(), theMode);
@@ -80,7 +80,7 @@ void OSD_OpenFileBuf(std::filebuf& theBuff,
                      const TCollection_ExtendedString& theName,
                      const std::ios_base::openmode theMode)
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
   theBuff.open ((const wchar_t* )theName.ToExtString(), theMode);
 #else
   // conversion in UTF-8 for linux
@@ -97,7 +97,7 @@ void OSD_OpenStream(std::ofstream& theStream,
                     const char* theName,
                     const std::ios_base::openmode theMode)
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
   // file name is treated as UTF-8 string and converted to UTF-16 one
   const TCollection_ExtendedString aFileNameW (theName, Standard_True);
   theStream.open ((const wchar_t* )aFileNameW.ToExtString(), theMode);
@@ -114,7 +114,7 @@ void OSD_OpenStream(std::ofstream& theStream,
                     const TCollection_ExtendedString& theName,
                     const std::ios_base::openmode theMode)
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
   theStream.open ((const wchar_t* )theName.ToExtString(), theMode);
 #else
   // conversion in UTF-8 for linux

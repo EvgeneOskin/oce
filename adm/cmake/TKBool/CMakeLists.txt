@@ -1,13 +1,13 @@
 project(TKBool)
 
 if (WIN32)
-  list( APPEND TKBool_PRECOMPILED_DEFS "-D__TopOpeBRep_DLL" )
-  list( APPEND TKBool_PRECOMPILED_DEFS "-D__TopOpeBRepDS_DLL" )
-  list( APPEND TKBool_PRECOMPILED_DEFS "-D__TopOpeBRepBuild_DLL" )
-  list( APPEND TKBool_PRECOMPILED_DEFS "-D__TopOpeBRepTool_DLL" )
-  list( APPEND TKBool_PRECOMPILED_DEFS "-D__BRepAlgo_DLL" )
-  list( APPEND TKBool_PRECOMPILED_DEFS "-D__BRepFill_DLL" )
-  list( APPEND TKBool_PRECOMPILED_DEFS "-D__BRepProj_DLL" )
+#  list( APPEND TKBool_PRECOMPILED_DEFS "-D__TopOpeBRep_DLL" )
+#  list( APPEND TKBool_PRECOMPILED_DEFS "-D__TopOpeBRepDS_DLL" )
+#  list( APPEND TKBool_PRECOMPILED_DEFS "-D__TopOpeBRepBuild_DLL" )
+#  list( APPEND TKBool_PRECOMPILED_DEFS "-D__TopOpeBRepTool_DLL" )
+#  list( APPEND TKBool_PRECOMPILED_DEFS "-D__BRepAlgo_DLL" )
+#  list( APPEND TKBool_PRECOMPILED_DEFS "-D__BRepFill_DLL" )
+#  list( APPEND TKBool_PRECOMPILED_DEFS "-D__BRepProj_DLL" )
   string( REGEX REPLACE ";" " " TKBool_PRECOMPILED_DEFS "${TKBool_PRECOMPILED_DEFS}")
 endif()
 
@@ -4129,7 +4129,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKBool)
- add_library( TKBool SHARED ${TKBool_USED_SRCFILES} )
+ add_library( TKBool STATIC ${TKBool_USED_SRCFILES} )
 
  set_property(TARGET TKBool PROPERTY FOLDER ModelingAlgorithms)
 
@@ -4148,3 +4148,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKBool)
  include_directories( ${TKBool_COMPILER_DIRECTORIES} )
  target_link_libraries( TKBool ${TKBool_USED_LIBS} )
 endif()
+

@@ -1,14 +1,14 @@
 project(TKService)
 
 if (WIN32)
-  list( APPEND TKService_PRECOMPILED_DEFS "-D__Aspect_DLL" )
-  list( APPEND TKService_PRECOMPILED_DEFS "-D__InterfaceGraphic_DLL" )
-  list( APPEND TKService_PRECOMPILED_DEFS "-D__SelectBasics_DLL" )
-  list( APPEND TKService_PRECOMPILED_DEFS "-D__Image_DLL" )
-  list( APPEND TKService_PRECOMPILED_DEFS "-D__Cocoa_DLL" )
-  list( APPEND TKService_PRECOMPILED_DEFS "-D__TColQuantity_DLL" )
-  list( APPEND TKService_PRECOMPILED_DEFS "-D__Font_DLL" )
-  list( APPEND TKService_PRECOMPILED_DEFS "-D__WNT_DLL" )
+#  list( APPEND TKService_PRECOMPILED_DEFS "-D__Aspect_DLL" )
+#  list( APPEND TKService_PRECOMPILED_DEFS "-D__InterfaceGraphic_DLL" )
+#  list( APPEND TKService_PRECOMPILED_DEFS "-D__SelectBasics_DLL" )
+#  list( APPEND TKService_PRECOMPILED_DEFS "-D__Image_DLL" )
+#  list( APPEND TKService_PRECOMPILED_DEFS "-D__Cocoa_DLL" )
+#  list( APPEND TKService_PRECOMPILED_DEFS "-D__TColQuantity_DLL" )
+#  list( APPEND TKService_PRECOMPILED_DEFS "-D__Font_DLL" )
+#  list( APPEND TKService_PRECOMPILED_DEFS "-D__WNT_DLL" )
   string( REGEX REPLACE ";" " " TKService_PRECOMPILED_DEFS "${TKService_PRECOMPILED_DEFS}")
 endif()
 
@@ -825,7 +825,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKService)
- add_library( TKService SHARED ${TKService_USED_SRCFILES} )
+ add_library( TKService STATIC ${TKService_USED_SRCFILES} )
 
  set_property(TARGET TKService PROPERTY FOLDER Visualization)
 

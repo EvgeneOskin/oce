@@ -21,7 +21,7 @@
 #error "Wrong compiler options has been detected. Add /DWNT option for proper compilation!!!!!"
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 # include <limits>
 #else
 # include <limits.h>

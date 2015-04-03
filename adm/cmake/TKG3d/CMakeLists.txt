@@ -1,14 +1,14 @@
 project(TKG3d)
 
 if (WIN32)
-  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__Geom_DLL" )
-  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__TColGeom_DLL" )
-  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__GeomAdaptor_DLL" )
-  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__AdvApprox_DLL" )
-  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__GeomLProp_DLL" )
-  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__Adaptor3d_DLL" )
-  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__LProp3d_DLL" )
-  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__TopAbs_DLL" )
+#  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__Geom_DLL" )
+#  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__TColGeom_DLL" )
+#  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__GeomAdaptor_DLL" )
+#  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__AdvApprox_DLL" )
+#  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__GeomLProp_DLL" )
+#  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__Adaptor3d_DLL" )
+#  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__LProp3d_DLL" )
+#  list( APPEND TKG3d_PRECOMPILED_DEFS "-D__TopAbs_DLL" )
   string( REGEX REPLACE ";" " " TKG3d_PRECOMPILED_DEFS "${TKG3d_PRECOMPILED_DEFS}")
 endif()
 
@@ -1216,7 +1216,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKG3d)
- add_library( TKG3d SHARED ${TKG3d_USED_SRCFILES} )
+ add_library( TKG3d STATIC ${TKG3d_USED_SRCFILES} )
 
  set_property(TARGET TKG3d PROPERTY FOLDER ModelingData)
 
@@ -1235,3 +1235,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKG3d)
  include_directories( ${TKG3d_COMPILER_DIRECTORIES} )
  target_link_libraries( TKG3d ${TKG3d_USED_LIBS} )
 endif()
+

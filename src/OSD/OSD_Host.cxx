@@ -35,7 +35,7 @@ const OSD_WhoAmI Iam = OSD_WHost;
 #include <sys/ioctl.h>
 #include <net/if.h>
 extern "C" {
-  int gethostname(char* address, int len); 
+  int gethostname(char* address, int len);
 }
 #endif
 
@@ -62,8 +62,8 @@ TCollection_AsciiString result;
 // =========================================================================
 
 OSD_SysType OSD_Host::SystemId()const{
-struct utsname info; 
- 
+struct utsname info;
+
  uname (&info);
 
  if (!strcmp(info.sysname,"SunOS"))          return (OSD_UnixBSD);
@@ -137,8 +137,8 @@ TCollection_AsciiString OSD_Host::InternetAddress(){
 
 // =========================================================================
 OSD_OEMType OSD_Host::MachineType(){
-struct utsname info; 
- 
+struct utsname info;
+
  uname (&info);
 
  if (!strcmp(info.sysname,"SunOS"))         return (OSD_SUN);
@@ -218,39 +218,41 @@ OSD_Host :: OSD_Host () {
    _osd_wnt_set_error ( myError, OSD_WHost );
 
   } else if (  !GetComputerName ( szHostName, &nSize )  ) {
-  
+
    _osd_wnt_set_error ( myError, OSD_WHost );
-  
+
   } else {
- 
+
    ms.dwLength = sizeof ( MEMORYSTATUS );
    GlobalMemoryStatus ( &ms );
 
   }  // end else
 
   if (  !Failed ()  ) {
-  
+
     memSize = (Standard_Integer) ms.dwAvailPageFile;
 
+#ifndef __MINGW32__
    if (   WSAStartup (  MAKEWORD( 1, 1 ), &wd  )   ) {
-   
+
     _osd_wnt_set_error ( myError, OSD_WHost );
-   
+
    } else if (   (  phe = gethostbyname ( szHostName )  ) == NULL   ) {
-   
+
     _osd_wnt_set_error ( myError, OSD_WHost );
-   
+
    } else {
 
     CopyMemory (  &inAddr, *phe -> h_addr_list, sizeof ( IN_ADDR )  );
     hostAddr = inet_ntoa ( inAddr );
 
    }  // end else
-  
+#endif
+
   }  // end if
 
   if (  !Failed ()  ) {
-  
+
    hostName  = szHostName;
    interAddr = Standard_CString ( hostAddr );
    wsprintf (
@@ -260,9 +262,9 @@ OSD_Host :: OSD_Host () {
    version = osVerInfo.szCSDVersion;
 
    fInit = TRUE;
-  
+
   }  // end if
- 
+
  }  // end if
 
  if ( fInit )

@@ -23,7 +23,7 @@ const Standard_Integer SIZEOFNORMALEXTENDEDSECTION = 16;
 
 //=======================================================================
 //function : FSD_File
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 FSD_File::FSD_File()
@@ -62,7 +62,7 @@ Storage_Error FSD_File::IsGoodFileType(const TCollection_AsciiString& aName)
 
 //=======================================================================
 //function : Open
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_Error FSD_File::Open(const TCollection_AsciiString& aName,const Storage_OpenMode aMode)
@@ -73,7 +73,7 @@ Storage_Error FSD_File::Open(const TCollection_AsciiString& aName,const Storage_
 
   if (OpenMode() == Storage_VSNone) {
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
     TCollection_ExtendedString aWName(aName);
     if (aMode == Storage_VSRead) {
       myStream.open( (const wchar_t*) aWName.ToExtString(),ios::in); // ios::nocreate is not portable
@@ -94,7 +94,7 @@ Storage_Error FSD_File::Open(const TCollection_AsciiString& aName,const Storage_
       myStream.open(aName.ToCString(),ios::in|ios::out);
 #endif
     }
-    
+
     if (myStream.fail()) {
       result = Storage_VSOpenError;
     }
@@ -113,7 +113,7 @@ Storage_Error FSD_File::Open(const TCollection_AsciiString& aName,const Storage_
 
 //=======================================================================
 //function : IsEnd
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Standard_Boolean FSD_File::IsEnd()
@@ -123,7 +123,7 @@ Standard_Boolean FSD_File::IsEnd()
 
 //=======================================================================
 //function : Close
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_Error FSD_File::Close()
@@ -153,7 +153,7 @@ const Standard_CString FSD_File::MagicNumber()
 
 //=======================================================================
 //function : FlushEndOfLine
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::FlushEndOfLine()
@@ -185,13 +185,13 @@ void FSD_File::ReadLine(TCollection_AsciiString& buffer)
 {
   char Buffer[8193];
   Standard_Boolean IsEnd = Standard_False;
-  
+
   buffer.Clear();
 
   while (!IsEnd && !FSD_File::IsEnd()) {
     Buffer[0] = '\0';
     myStream.getline(Buffer,8192,'\n');
-    
+
 //    char c;
 //    if (myStream.get(c) && c != '\n') {
 //      buffer += Buffer;
@@ -228,7 +228,7 @@ void FSD_File::WriteExtendedLine(const TCollection_ExtendedString& buffer)
 
 //=======================================================================
 //function : ReadExtendedLine
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::ReadExtendedLine(TCollection_ExtendedString& buffer)
@@ -237,7 +237,7 @@ void FSD_File::ReadExtendedLine(TCollection_ExtendedString& buffer)
   Standard_ExtCharacter i = 0,j,count = 0;
   Standard_Boolean fin = Standard_False;
   Standard_CString tg = ENDOFNORMALEXTENDEDSECTION;
- 
+
   buffer.Clear();
 
   while (!fin && !IsEnd()) {
@@ -250,20 +250,20 @@ void FSD_File::ReadExtendedLine(TCollection_ExtendedString& buffer)
       i = (Standard_ExtCharacter)c;
       if (c == '\0') fin = Standard_True;
       i = (i << 8);
-      
+
       myStream.get(c);
       if (c == tg[count]) count++;
       else count = 0;
       if (count < SIZEOFNORMALEXTENDEDSECTION) {
-	j = (Standard_ExtCharacter)c;
-	if (c != '\n') {
-	  fin = Standard_False;
-	  i |= (0x00FF & j);
-	  buffer += (Standard_ExtCharacter)i;
-	}
+    j = (Standard_ExtCharacter)c;
+    if (c != '\n') {
+      fin = Standard_False;
+      i |= (0x00FF & j);
+      buffer += (Standard_ExtCharacter)i;
+    }
       }
       else {
-	Storage_StreamExtCharParityError::Raise();	
+    Storage_StreamExtCharParityError::Raise();
       }
     }
     else {
@@ -301,9 +301,9 @@ void FSD_File::ReadString(TCollection_AsciiString& buffer)
   char Buffer[8193];
   char *bpos;
   Standard_Boolean IsEnd = Standard_False,isFirstTime = Standard_True;
-  
+
   buffer.Clear();
-  
+
   while (!IsEnd && !FSD_File::IsEnd()) {
     Buffer[0] = '\0';
     myStream.getline(Buffer,8192,'\n');
@@ -325,7 +325,7 @@ void FSD_File::ReadString(TCollection_AsciiString& buffer)
       IsEnd = Standard_True;
 //    }
   }
-  
+
 }
 
 //=======================================================================
@@ -370,13 +370,13 @@ void FSD_File::ReadWord(TCollection_AsciiString& buffer)
 
 //=======================================================================
 //function : FindTag
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_Error FSD_File::FindTag(const Standard_CString aTag)
 {
   TCollection_AsciiString l;
-  
+
   ReadString(l);
 
   while ((strcmp(l.ToCString(),aTag) != 0) && !IsEnd()) {
@@ -393,7 +393,7 @@ Storage_Error FSD_File::FindTag(const Standard_CString aTag)
 
 //=======================================================================
 //function : SkipObject
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::SkipObject()
@@ -415,7 +415,7 @@ Storage_BaseDriver& FSD_File::PutReference(const Standard_Integer aValue)
 
 //=======================================================================
 //function : PutCharacter
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::PutCharacter(const Standard_Character aValue)
@@ -430,7 +430,7 @@ Storage_BaseDriver& FSD_File::PutCharacter(const Standard_Character aValue)
 
 //=======================================================================
 //function : PutExtCharacter
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::PutExtCharacter(const Standard_ExtCharacter aValue)
@@ -442,7 +442,7 @@ Storage_BaseDriver& FSD_File::PutExtCharacter(const Standard_ExtCharacter aValue
 
 //=======================================================================
 //function : PutInteger
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::PutInteger(const Standard_Integer aValue)
@@ -454,7 +454,7 @@ Storage_BaseDriver& FSD_File::PutInteger(const Standard_Integer aValue)
 
 //=======================================================================
 //function : PutBoolean
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::PutBoolean(const Standard_Boolean aValue)
@@ -466,7 +466,7 @@ Storage_BaseDriver& FSD_File::PutBoolean(const Standard_Boolean aValue)
 
 //=======================================================================
 //function : PutReal
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::PutReal(const Standard_Real aValue)
@@ -478,7 +478,7 @@ Storage_BaseDriver& FSD_File::PutReal(const Standard_Real aValue)
 
 //=======================================================================
 //function : PutShortReal
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::PutShortReal(const Standard_ShortReal aValue)
@@ -502,7 +502,7 @@ Storage_BaseDriver& FSD_File::GetReference(Standard_Integer& aValue)
 
 //=======================================================================
 //function : GetCharacter
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::GetCharacter(Standard_Character& aValue)
@@ -522,19 +522,19 @@ Storage_BaseDriver& FSD_File::GetCharacter(Standard_Character& aValue)
 
 //=======================================================================
 //function : GetExtCharacter
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::GetExtCharacter(Standard_ExtCharacter& aValue)
 {
   if (!(myStream >> aValue)) Storage_StreamTypeMismatchError::Raise();
-  
+
   return *this;
 }
 
 //=======================================================================
 //function : GetInteger
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::GetInteger(Standard_Integer& aValue)
@@ -546,7 +546,7 @@ Storage_BaseDriver& FSD_File::GetInteger(Standard_Integer& aValue)
 
 //=======================================================================
 //function : GetBoolean
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::GetBoolean(Standard_Boolean& aValue)
@@ -558,7 +558,7 @@ Storage_BaseDriver& FSD_File::GetBoolean(Standard_Boolean& aValue)
 
 //=======================================================================
 //function : GetReal
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::GetReal(Standard_Real& aValue)
@@ -580,7 +580,7 @@ Storage_BaseDriver& FSD_File::GetReal(Standard_Real& aValue)
 
 //=======================================================================
 //function : GetShortReal
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 Storage_BaseDriver& FSD_File::GetShortReal(Standard_ShortReal& aValue)
@@ -604,7 +604,7 @@ Storage_BaseDriver& FSD_File::GetShortReal(Standard_ShortReal& aValue)
 
 //=======================================================================
 //function : Destroy
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::Destroy()
@@ -619,7 +619,7 @@ void FSD_File::Destroy()
 //purpose  : -------------------------- INFO : WRITE
 //=======================================================================
 
-Storage_Error FSD_File::BeginWriteInfoSection() 
+Storage_Error FSD_File::BeginWriteInfoSection()
 {
   myStream << FSD_File::MagicNumber() << '\n';
   myStream << "BEGIN_INFO_SECTION\n";
@@ -630,18 +630,18 @@ Storage_Error FSD_File::BeginWriteInfoSection()
 
 //=======================================================================
 //function : WriteInfo
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::WriteInfo(const Standard_Integer nbObj,
-			 const TCollection_AsciiString& dbVersion,
-			 const TCollection_AsciiString& date,
-			 const TCollection_AsciiString& schemaName,
-			 const TCollection_AsciiString& schemaVersion,
-			 const TCollection_ExtendedString& appName,
-			 const TCollection_AsciiString& appVersion,
-			 const TCollection_ExtendedString& dataType,
-			 const TColStd_SequenceOfAsciiString& userInfo) 
+             const TCollection_AsciiString& dbVersion,
+             const TCollection_AsciiString& date,
+             const TCollection_AsciiString& schemaName,
+             const TCollection_AsciiString& schemaVersion,
+             const TCollection_ExtendedString& appName,
+             const TCollection_AsciiString& appVersion,
+             const TCollection_ExtendedString& dataType,
+             const TColStd_SequenceOfAsciiString& userInfo)
 {
   Standard_Integer i;
 
@@ -669,7 +669,7 @@ void FSD_File::WriteInfo(const Standard_Integer nbObj,
 //purpose  : read
 //=======================================================================
 
-Storage_Error FSD_File::EndWriteInfoSection() 
+Storage_Error FSD_File::EndWriteInfoSection()
 {
   myStream << "END_INFO_SECTION\n";
   if (myStream.bad())  Storage_StreamWriteError::Raise();
@@ -678,17 +678,17 @@ Storage_Error FSD_File::EndWriteInfoSection()
 
 //=======================================================================
 //function : BeginReadInfoSection
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-Storage_Error FSD_File::BeginReadInfoSection() 
+Storage_Error FSD_File::BeginReadInfoSection()
 {
   Storage_Error s;
   TCollection_AsciiString l;
   Standard_Size        len = strlen(FSD_File::MagicNumber());
 
   ReadChar(l,len);
-  
+
   if (strncmp(FSD_File::MagicNumber(),l.ToCString(),len) != 0) {
     s = Storage_VSFormatError;
   }
@@ -705,14 +705,14 @@ Storage_Error FSD_File::BeginReadInfoSection()
 //=======================================================================
 
 void FSD_File::ReadInfo(Standard_Integer& nbObj,
-			TCollection_AsciiString& dbVersion,
-			TCollection_AsciiString& date,
-			TCollection_AsciiString& schemaName,
-			TCollection_AsciiString& schemaVersion,
-			TCollection_ExtendedString& appName,
-			TCollection_AsciiString& appVersion,
-			TCollection_ExtendedString& dataType,
-			TColStd_SequenceOfAsciiString& userInfo) 
+            TCollection_AsciiString& dbVersion,
+            TCollection_AsciiString& date,
+            TCollection_AsciiString& schemaName,
+            TCollection_AsciiString& schemaVersion,
+            TCollection_ExtendedString& appName,
+            TCollection_AsciiString& appVersion,
+            TCollection_ExtendedString& dataType,
+            TColStd_SequenceOfAsciiString& userInfo)
 {
   if (!(myStream >> nbObj)) Storage_StreamTypeMismatchError::Raise();
 
@@ -747,7 +747,7 @@ void FSD_File::ReadInfo(Standard_Integer& nbObj,
 //           write
 //=======================================================================
 
-Storage_Error FSD_File::EndReadInfoSection() 
+Storage_Error FSD_File::EndReadInfoSection()
 {
   return FindTag("END_INFO_SECTION");
 }
@@ -757,7 +757,7 @@ Storage_Error FSD_File::EndReadInfoSection()
 //purpose  : ---------------- COMMENTS : WRITE
 //=======================================================================
 
-Storage_Error FSD_File::BeginWriteCommentSection() 
+Storage_Error FSD_File::BeginWriteCommentSection()
 {
   myStream << "BEGIN_COMMENT_SECTION\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -766,7 +766,7 @@ Storage_Error FSD_File::BeginWriteCommentSection()
 
 //=======================================================================
 //function : WriteComment
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::WriteComment(const TColStd_SequenceOfExtendedString& aCom)
@@ -788,7 +788,7 @@ void FSD_File::WriteComment(const TColStd_SequenceOfExtendedString& aCom)
 //purpose  : read
 //=======================================================================
 
-Storage_Error FSD_File::EndWriteCommentSection() 
+Storage_Error FSD_File::EndWriteCommentSection()
 {
   myStream << "END_COMMENT_SECTION\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -800,14 +800,14 @@ Storage_Error FSD_File::EndWriteCommentSection()
 //purpose  : ---------------- COMMENTS : READ
 //=======================================================================
 
-Storage_Error FSD_File::BeginReadCommentSection() 
+Storage_Error FSD_File::BeginReadCommentSection()
 {
   return FindTag("BEGIN_COMMENT_SECTION");
 }
 
 //=======================================================================
 //function : ReadComment
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::ReadComment(TColStd_SequenceOfExtendedString& aCom)
@@ -816,8 +816,8 @@ void FSD_File::ReadComment(TColStd_SequenceOfExtendedString& aCom)
   Standard_Integer           len,i;
 
   if (!(myStream >> len)) Storage_StreamTypeMismatchError::Raise();
-  
-  FlushEndOfLine();  
+
+  FlushEndOfLine();
 
   for (i = 1; i <= len && !IsEnd(); i++) {
     ReadExtendedLine(line);
@@ -828,10 +828,10 @@ void FSD_File::ReadComment(TColStd_SequenceOfExtendedString& aCom)
 
 //=======================================================================
 //function : EndReadCommentSection
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-Storage_Error FSD_File::EndReadCommentSection() 
+Storage_Error FSD_File::EndReadCommentSection()
 {
   return FindTag("END_COMMENT_SECTION");
 }
@@ -841,7 +841,7 @@ Storage_Error FSD_File::EndReadCommentSection()
 //purpose  : --------------- TYPE : WRITE
 //=======================================================================
 
-Storage_Error FSD_File::BeginWriteTypeSection() 
+Storage_Error FSD_File::BeginWriteTypeSection()
 {
   myStream << "BEGIN_TYPE_SECTION\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -850,10 +850,10 @@ Storage_Error FSD_File::BeginWriteTypeSection()
 
 //=======================================================================
 //function : SetTypeSectionSize
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::SetTypeSectionSize(const Standard_Integer aSize) 
+void FSD_File::SetTypeSectionSize(const Standard_Integer aSize)
 {
   myStream << aSize << "\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -861,11 +861,11 @@ void FSD_File::SetTypeSectionSize(const Standard_Integer aSize)
 
 //=======================================================================
 //function : WriteTypeInformations
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::WriteTypeInformations(const Standard_Integer typeNum,
-				      const TCollection_AsciiString& typeName) 
+                      const TCollection_AsciiString& typeName)
 {
   myStream << typeNum << " " << typeName.ToCString() << "\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -876,7 +876,7 @@ void FSD_File::WriteTypeInformations(const Standard_Integer typeNum,
 //purpose  : read
 //=======================================================================
 
-Storage_Error FSD_File::EndWriteTypeSection() 
+Storage_Error FSD_File::EndWriteTypeSection()
 {
   myStream << "END_TYPE_SECTION\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -888,17 +888,17 @@ Storage_Error FSD_File::EndWriteTypeSection()
 //purpose  : ------------------- TYPE : READ
 //=======================================================================
 
-Storage_Error FSD_File::BeginReadTypeSection() 
+Storage_Error FSD_File::BeginReadTypeSection()
 {
   return FindTag("BEGIN_TYPE_SECTION");
 }
 
 //=======================================================================
 //function : TypeSectionSize
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-Standard_Integer FSD_File::TypeSectionSize() 
+Standard_Integer FSD_File::TypeSectionSize()
 {
   Standard_Integer i;
 
@@ -911,11 +911,11 @@ Standard_Integer FSD_File::TypeSectionSize()
 
 //=======================================================================
 //function : ReadTypeInformations
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::ReadTypeInformations(Standard_Integer& typeNum,
-				    TCollection_AsciiString& typeName) 
+                    TCollection_AsciiString& typeName)
 {
   if (!(myStream >> typeNum)) Storage_StreamTypeMismatchError::Raise();
   if (!(myStream >> typeName)) Storage_StreamTypeMismatchError::Raise();
@@ -928,7 +928,7 @@ void FSD_File::ReadTypeInformations(Standard_Integer& typeNum,
 //           write
 //=======================================================================
 
-Storage_Error FSD_File::EndReadTypeSection() 
+Storage_Error FSD_File::EndReadTypeSection()
 {
   return FindTag("END_TYPE_SECTION");
 }
@@ -938,7 +938,7 @@ Storage_Error FSD_File::EndReadTypeSection()
 //purpose  : -------------------- ROOT : WRITE
 //=======================================================================
 
-Storage_Error FSD_File::BeginWriteRootSection() 
+Storage_Error FSD_File::BeginWriteRootSection()
 {
   myStream << "BEGIN_ROOT_SECTION\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -947,10 +947,10 @@ Storage_Error FSD_File::BeginWriteRootSection()
 
 //=======================================================================
 //function : SetRootSectionSize
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::SetRootSectionSize(const Standard_Integer aSize) 
+void FSD_File::SetRootSectionSize(const Standard_Integer aSize)
 {
   myStream << aSize << "\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -958,10 +958,10 @@ void FSD_File::SetRootSectionSize(const Standard_Integer aSize)
 
 //=======================================================================
 //function : WriteRoot
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::WriteRoot(const TCollection_AsciiString& rootName, const Standard_Integer aRef, const TCollection_AsciiString& rootType) 
+void FSD_File::WriteRoot(const TCollection_AsciiString& rootName, const Standard_Integer aRef, const TCollection_AsciiString& rootType)
 {
   myStream << aRef << " " << rootName.ToCString() << " " << rootType.ToCString() << "\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -972,7 +972,7 @@ void FSD_File::WriteRoot(const TCollection_AsciiString& rootName, const Standard
 //purpose  : read
 //=======================================================================
 
-Storage_Error FSD_File::EndWriteRootSection() 
+Storage_Error FSD_File::EndWriteRootSection()
 {
   myStream << "END_ROOT_SECTION\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -984,33 +984,33 @@ Storage_Error FSD_File::EndWriteRootSection()
 //purpose  : ----------------------- ROOT : READ
 //=======================================================================
 
-Storage_Error FSD_File::BeginReadRootSection() 
+Storage_Error FSD_File::BeginReadRootSection()
 {
   return FindTag("BEGIN_ROOT_SECTION");
 }
 
 //=======================================================================
 //function : RootSectionSize
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-Standard_Integer FSD_File::RootSectionSize() 
+Standard_Integer FSD_File::RootSectionSize()
 {
   Standard_Integer i;
 
   if (!(myStream >> i)) Storage_StreamTypeMismatchError::Raise();
-  
+
   FlushEndOfLine();
-  
+
   return i;
 }
 
 //=======================================================================
 //function : ReadRoot
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::ReadRoot(TCollection_AsciiString& rootName, Standard_Integer& aRef,TCollection_AsciiString& rootType) 
+void FSD_File::ReadRoot(TCollection_AsciiString& rootName, Standard_Integer& aRef,TCollection_AsciiString& rootType)
 {
   if (!(myStream >> aRef)) Storage_StreamTypeMismatchError::Raise();
   ReadWord(rootName);
@@ -1023,7 +1023,7 @@ void FSD_File::ReadRoot(TCollection_AsciiString& rootName, Standard_Integer& aRe
 //           write
 //=======================================================================
 
-Storage_Error FSD_File::EndReadRootSection() 
+Storage_Error FSD_File::EndReadRootSection()
 {
   return FindTag("END_ROOT_SECTION");
 }
@@ -1033,7 +1033,7 @@ Storage_Error FSD_File::EndReadRootSection()
 //purpose  : -------------------------- REF : WRITE
 //=======================================================================
 
-Storage_Error FSD_File::BeginWriteRefSection() 
+Storage_Error FSD_File::BeginWriteRefSection()
 {
   myStream << "BEGIN_REF_SECTION\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1042,10 +1042,10 @@ Storage_Error FSD_File::BeginWriteRefSection()
 
 //=======================================================================
 //function : SetRefSectionSize
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::SetRefSectionSize(const Standard_Integer aSize) 
+void FSD_File::SetRefSectionSize(const Standard_Integer aSize)
 {
   myStream << aSize << "\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1053,11 +1053,11 @@ void FSD_File::SetRefSectionSize(const Standard_Integer aSize)
 
 //=======================================================================
 //function : WriteReferenceType
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::WriteReferenceType(const Standard_Integer reference,
-				  const Standard_Integer typeNum) 
+                  const Standard_Integer typeNum)
 {
   myStream << reference << " " << typeNum << "\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1068,7 +1068,7 @@ void FSD_File::WriteReferenceType(const Standard_Integer reference,
 //purpose  : read
 //=======================================================================
 
-Storage_Error FSD_File::EndWriteRefSection() 
+Storage_Error FSD_File::EndWriteRefSection()
 {
   myStream << "END_REF_SECTION\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1080,17 +1080,17 @@ Storage_Error FSD_File::EndWriteRefSection()
 //purpose  : ----------------------- REF : READ
 //=======================================================================
 
-Storage_Error FSD_File::BeginReadRefSection() 
+Storage_Error FSD_File::BeginReadRefSection()
 {
   return FindTag("BEGIN_REF_SECTION");
 }
 
 //=======================================================================
 //function : RefSectionSize
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-Standard_Integer FSD_File::RefSectionSize() 
+Standard_Integer FSD_File::RefSectionSize()
 {
   Standard_Integer i;
 
@@ -1102,11 +1102,11 @@ Standard_Integer FSD_File::RefSectionSize()
 
 //=======================================================================
 //function : ReadReferenceType
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::ReadReferenceType(Standard_Integer& reference,
-				 Standard_Integer& typeNum) 
+                 Standard_Integer& typeNum)
 {
   if (!(myStream >> reference)) Storage_StreamTypeMismatchError::Raise();
   if (!(myStream >> typeNum)) Storage_StreamTypeMismatchError::Raise();
@@ -1119,7 +1119,7 @@ void FSD_File::ReadReferenceType(Standard_Integer& reference,
 //           write
 //=======================================================================
 
-Storage_Error FSD_File::EndReadRefSection() 
+Storage_Error FSD_File::EndReadRefSection()
 {
   return FindTag("END_REF_SECTION");
 }
@@ -1129,7 +1129,7 @@ Storage_Error FSD_File::EndReadRefSection()
 //purpose  : -------------------- DATA : WRITE
 //=======================================================================
 
-Storage_Error FSD_File::BeginWriteDataSection() 
+Storage_Error FSD_File::BeginWriteDataSection()
 {
   myStream << "BEGIN_DATA_SECTION";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1138,11 +1138,11 @@ Storage_Error FSD_File::BeginWriteDataSection()
 
 //=======================================================================
 //function : WritePersistentObjectHeader
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::WritePersistentObjectHeader(const Standard_Integer aRef,
-					   const Standard_Integer aType) 
+                       const Standard_Integer aType)
 {
   myStream << "\n#" << aRef << "=%" << aType;
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1150,10 +1150,10 @@ void FSD_File::WritePersistentObjectHeader(const Standard_Integer aRef,
 
 //=======================================================================
 //function : BeginWritePersistentObjectData
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::BeginWritePersistentObjectData() 
+void FSD_File::BeginWritePersistentObjectData()
 {
   myStream << "( ";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1161,10 +1161,10 @@ void FSD_File::BeginWritePersistentObjectData()
 
 //=======================================================================
 //function : BeginWriteObjectData
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::BeginWriteObjectData() 
+void FSD_File::BeginWriteObjectData()
 {
   myStream << "( ";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1172,10 +1172,10 @@ void FSD_File::BeginWriteObjectData()
 
 //=======================================================================
 //function : EndWriteObjectData
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::EndWriteObjectData() 
+void FSD_File::EndWriteObjectData()
 {
   myStream << ") ";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1183,10 +1183,10 @@ void FSD_File::EndWriteObjectData()
 
 //=======================================================================
 //function : EndWritePersistentObjectData
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::EndWritePersistentObjectData() 
+void FSD_File::EndWritePersistentObjectData()
 {
   myStream << ")";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1197,7 +1197,7 @@ void FSD_File::EndWritePersistentObjectData()
 //purpose  : read
 //=======================================================================
 
-Storage_Error FSD_File::EndWriteDataSection() 
+Storage_Error FSD_File::EndWriteDataSection()
 {
   myStream << "\nEND_DATA_SECTION\n";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
@@ -1209,18 +1209,18 @@ Storage_Error FSD_File::EndWriteDataSection()
 //purpose  : ---------------------- DATA : READ
 //=======================================================================
 
-Storage_Error FSD_File::BeginReadDataSection() 
+Storage_Error FSD_File::BeginReadDataSection()
 {
   return FindTag("BEGIN_DATA_SECTION");
 }
 
 //=======================================================================
 //function : ReadPersistentObjectHeader
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void FSD_File::ReadPersistentObjectHeader(Standard_Integer& aRef,
-					  Standard_Integer& aType) 
+                      Standard_Integer& aType)
 {
   char c;
 
@@ -1260,10 +1260,10 @@ void FSD_File::ReadPersistentObjectHeader(Standard_Integer& aRef,
 
 //=======================================================================
 //function : BeginReadPersistentObjectData
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::BeginReadPersistentObjectData() 
+void FSD_File::BeginReadPersistentObjectData()
 {
   char c;
   myStream.get(c);
@@ -1279,10 +1279,10 @@ void FSD_File::BeginReadPersistentObjectData()
 
 //=======================================================================
 //function : BeginReadObjectData
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::BeginReadObjectData() 
+void FSD_File::BeginReadObjectData()
 {
 
   char c;
@@ -1299,10 +1299,10 @@ void FSD_File::BeginReadObjectData()
 
 //=======================================================================
 //function : EndReadObjectData
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::EndReadObjectData() 
+void FSD_File::EndReadObjectData()
 {
 
   char c;
@@ -1319,10 +1319,10 @@ void FSD_File::EndReadObjectData()
 
 //=======================================================================
 //function : EndReadPersistentObjectData
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-void FSD_File::EndReadPersistentObjectData() 
+void FSD_File::EndReadPersistentObjectData()
 {
 
   char c;
@@ -1347,10 +1347,10 @@ void FSD_File::EndReadPersistentObjectData()
 
 //=======================================================================
 //function : EndReadDataSection
-//purpose  : 
+//purpose  :
 //=======================================================================
 
-Storage_Error FSD_File::EndReadDataSection() 
+Storage_Error FSD_File::EndReadDataSection()
 {
   return FindTag("END_DATA_SECTION");
 }

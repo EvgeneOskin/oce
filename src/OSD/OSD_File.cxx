@@ -16,7 +16,7 @@
 //                    UNIX Part
 //------------------------------------------------------------------------
 
-#ifndef _WIN32
+#if !defined(_WIN32) || (defined(__CYGWIN32__) || defined(__MINGW32__))
 
 #include <Standard_ProgramError.hxx>
 #include <OSD_OSDError.hxx>
@@ -30,7 +30,7 @@ const OSD_WhoAmI Iam = OSD_WFile;
 
 #if defined (sun) || defined(SOLARIS)
 #define POSIX
-#else             
+#else
 #define SYSV
 #endif
 
@@ -82,7 +82,7 @@ OSD_File::OSD_File(const OSD_Path& Name):OSD_FileNode(Name)
 
 void OSD_File::Build(const OSD_OpenMode Mode,
                      const OSD_Protection& Protect){
- 
+
  Standard_Integer internal_prot;
  Standard_Integer internal_mode = O_CREAT | O_TRUNC ;
  TCollection_AsciiString aBuffer;
@@ -115,9 +115,9 @@ void OSD_File::Build(const OSD_OpenMode Mode,
    break;
  }
 
- myPath.SystemName( aBuffer ); 
+ myPath.SystemName( aBuffer );
  myFileChannel = open (aBuffer.ToCString(), internal_mode, internal_prot);
- if (myFileChannel >= 0) { 
+ if (myFileChannel >= 0) {
    myFILE = fdopen (myFileChannel, CMode);
  }
  else
@@ -142,8 +142,8 @@ void  OSD_File::Append(const OSD_OpenMode Mode,
 
  if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) {
     Standard_ProgramError::Raise("OSD_File::Append : it is a directory");
- } 
- 
+ }
+
  if (myPath.Name().Length()==0)
   Standard_ProgramError::Raise("OSD_File::Append : no name was given");
 
@@ -194,7 +194,7 @@ void  OSD_File::Open(const OSD_OpenMode Mode,
  Standard_Integer internal_mode = 0;
  TCollection_AsciiString aBuffer;
 
-  if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) { 
+  if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) {
     myError.SetValue (1, Iam, "Could not be open : it is a directory");
   }
 
@@ -250,7 +250,7 @@ OSD_File OSD_File::BuildTemporary(){
  close(dummy);                             // Close dummy file
  unlink("dummy");                          // Removes dummy file
 
-#else 
+#else
  OSD_File result;
  char *name = tmpnam((char*) 0) ;
 
@@ -270,19 +270,19 @@ OSD_File OSD_File::BuildTemporary(){
 
  return (result);
 }
- 
+
 
 
 // ---------------------------------------------------------------------
 // Read content of a file
 // ---------------------------------------------------------------------
- 
-void  OSD_File::Read(TCollection_AsciiString& Buffer, 
+
+void  OSD_File::Read(TCollection_AsciiString& Buffer,
                      const Standard_Integer Nbyte){
  Standard_PCharacter readbuf;
  int status;
 
-  if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) { 
+  if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) {
     Standard_ProgramError::Raise("OSD_File::Read : it is a directory");
   }
 
@@ -298,7 +298,7 @@ void  OSD_File::Read(TCollection_AsciiString& Buffer,
   Standard_ProgramError::Raise("OSD_File::Read : Nbyte is null");
 
  TCollection_AsciiString transfert(Nbyte,' ');
- readbuf = (Standard_PCharacter)transfert.ToCString();  
+ readbuf = (Standard_PCharacter)transfert.ToCString();
 
  status = read (myFileChannel, readbuf, Nbyte);
  //
@@ -314,13 +314,13 @@ void  OSD_File::Read(TCollection_AsciiString& Buffer,
 // Read a line from a file
 // ---------------------------------------------------------------------
 
-void OSD_File::ReadLine(TCollection_AsciiString& Buffer, 
-			const Standard_Integer Nbyte,
-			Standard_Integer& NByteRead)
+void OSD_File::ReadLine(TCollection_AsciiString& Buffer,
+            const Standard_Integer Nbyte,
+            Standard_Integer& NByteRead)
 {
   Standard_PCharacter readbuf, abuffer;
   //
-  if (OSD_File::KindOfFile() == OSD_DIRECTORY ) { 
+  if (OSD_File::KindOfFile() == OSD_DIRECTORY ) {
     Standard_ProgramError::Raise("OSD_File::Read : it is a directory");
   }
   if (myFileChannel == -1){
@@ -358,9 +358,9 @@ void OSD_File::ReadLine(TCollection_AsciiString& Buffer,
     Buffer.Trunc(NByteRead);
   }
 }
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // OSD::KindOfFile Retourne le type de fichier.
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 OSD_KindFile OSD_File::KindOfFile ( ) const{
 int status;
 struct stat buffer;
@@ -373,43 +373,45 @@ status = stat (FullName.ToCString()  , &buffer );
 if ( status == 0) {
   if       (  S_ISDIR(buffer.st_mode)  )  { return OSD_DIRECTORY ; }
   else if  (  S_ISREG(buffer.st_mode)  )  { return OSD_FILE      ; }
+#if !(defined(__CYGWIN32__) || defined(__MINGW32__))
   else if  (  S_ISLNK(buffer.st_mode)  )  { return OSD_LINK      ; }
   else if  (  S_ISSOCK(buffer.st_mode) )  { return OSD_SOCKET    ; }
+#endif
   else                                    { return OSD_UNKNOWN   ; }
 }
-return OSD_UNKNOWN   ; 
+return OSD_UNKNOWN   ;
 
 }
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Read content of a file
-// -------------------------------------------------------------------------- 
-void  OSD_File::Read(      Standard_Address&  Buffer, 
+// --------------------------------------------------------------------------
+void  OSD_File::Read(      Standard_Address&  Buffer,
                      const Standard_Integer   Nbyte,
                            Standard_Integer&  Readbyte)
 {
   int status;
-  
+
   Readbyte = 0;
-  if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) { 
+  if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) {
     Standard_ProgramError::Raise("OSD_File::Read : it is a directory");
   }
- 
+
   if (myFileChannel == -1)
     Standard_ProgramError::Raise("OSD_File::Read : file is not open");
-  
+
   if (Failed()) Perror();
-  
+
   if (myMode == OSD_WriteOnly)
     Standard_ProgramError::Raise("OSD_File::Read : file is Write only");
-  
+
   if (Nbyte <= 0)
     Standard_ProgramError::Raise("OSD_File::Read : Nbyte is null");
 
   if (Buffer == NULL)
     Standard_ProgramError::Raise("OSD_File::Read : Buffer is null");
-  
+
   status = read (myFileChannel, (char*) Buffer, Nbyte);
-  
+
   if (status == -1) myError.SetValue (errno, Iam, "Read");
   else{
     if ( status < Nbyte ) myIO = EOF;
@@ -419,16 +421,16 @@ void  OSD_File::Read(      Standard_Address&  Buffer,
 
 // Write content of a file
 
-void  OSD_File::Write(const TCollection_AsciiString &Buffer, 
+void  OSD_File::Write(const TCollection_AsciiString &Buffer,
                       const Standard_Integer Nbyte){
 
  Standard_CString writebuf;
  int status;
 
- if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) { 
+ if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) {
    Standard_ProgramError::Raise("OSD_File::Write : it is a directory");
  }
- 
+
  if (myFileChannel == -1)
   Standard_ProgramError::Raise("OSD_File::Write : file is not open");
 
@@ -450,25 +452,25 @@ void  OSD_File::Write(const TCollection_AsciiString &Buffer,
 }
 
 
-void  OSD_File::Write(const Standard_Address   Buffer, 
+void  OSD_File::Write(const Standard_Address   Buffer,
                       const Standard_Integer   Nbyte)
 {
 
   int status;
-  
+
   if (myFileChannel == -1)
     Standard_ProgramError::Raise("OSD_File::Write : file is not open");
-  
+
   if (Failed()) Perror();
-  
+
   if (myMode == OSD_ReadOnly)
     Standard_ProgramError::Raise("OSD_File::Write : file is Read only");
-  
+
   if (Nbyte <= 0)
     Standard_ProgramError::Raise("OSD_File::Write : Nbyte is null");
-  
+
   status = write (myFileChannel, (const char *)Buffer, Nbyte);
-  
+
   if ( status == -1) myError.SetValue (errno, Iam, "Write");
   else
     if ( status < Nbyte ) myIO = EOF;
@@ -480,7 +482,7 @@ void  OSD_File::Write(const Standard_Address   Buffer,
 
 // Move file pointer to a specified position
 
-void  OSD_File::Seek(const Standard_Integer Offset, 
+void  OSD_File::Seek(const Standard_Integer Offset,
                      const OSD_FromWhere Whence){
  int iwhere=0;
 
@@ -537,9 +539,9 @@ void  OSD_File::Close(){
 
 
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Test if at end of file
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 Standard_Boolean OSD_File::IsAtEnd(){
  if (myFileChannel == -1)
@@ -570,6 +572,8 @@ int status;
   Standard_ProgramError::Raise("OSD_File::SetLock : file is not open");
 
 
+#if defined(__CYGWIN32__) || defined(__MINGW32__)
+#else
 #ifdef POSIX
  int lock;
  struct stat buf;
@@ -641,6 +645,7 @@ int status;
  else myLock = Lock;
 #endif // SysV
 #endif // POSIX
+#endif // CYGWIN and MinGW
 }
 
 
@@ -653,7 +658,8 @@ int status;
 
  if (myFileChannel == -1)
   Standard_ProgramError::Raise("OSD_File::UnLock : file is not open");
-
+#if (defined(__CYGWIN32__) || defined(__MINGW32__))
+#else
 #ifdef POSIX
  struct stat buf;
 
@@ -661,7 +667,7 @@ int status;
   myError.SetValue(errno, Iam, "UnsetLock");
   return;
  }
- 
+
  status = lockf(myFileChannel,F_ULOCK, buf.st_size);
   if (status == -1) myError.SetValue (errno, Iam, "SetLock");
 
@@ -686,6 +692,7 @@ int status;
  if (status == -1) myError.SetValue (errno, Iam, "UnSetLock");
 #endif
 #endif // POSIX
+#endif // CYGWIN and MINGW
  else myLock = OSD_NoLock;
 }
 
@@ -705,9 +712,9 @@ OSD_LockType  OSD_File::GetLock(){
 
 
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Return size of a file
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 Standard_Size  OSD_File::Size(){
  struct stat buffer;
@@ -728,9 +735,9 @@ Standard_Size  OSD_File::Size(){
 }
 
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Print contains of a file
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 void OSD_File::Print (const OSD_Printer &WhichPrinter ){
 char buffer[255];
@@ -753,9 +760,9 @@ TCollection_AsciiString PrinterName;
 }
 
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Test if a file is open
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 Standard_Boolean OSD_File::IsOpen()const{
 
@@ -771,7 +778,7 @@ Standard_Boolean OSD_File::IsLocked(){
  if (myPath.Name().Length()==0)
    Standard_ProgramError::Raise("OSD_File::IsLocked : empty file name");
 
- return(myLock != OSD_NoLock); 
+ return(myLock != OSD_NoLock);
 }
 
 Standard_Boolean OSD_File::IsReadable()
@@ -912,10 +919,10 @@ void OSD_File :: Build (
 
  TCollection_AsciiString fName;
 
- if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) { 
+ if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) {
    Standard_ProgramError::Raise("OSD_File::Read : it is a directory");
  }
-                                        
+
  if (myFileHandle != INVALID_HANDLE_VALUE)
 
   RAISE(  "OSD_File :: Build (): incorrect call - file already opened"  );
@@ -1013,10 +1020,10 @@ void OSD_File :: Append (
    Seek ( 0, OSD_FromEnd );
 
   } else {
-  
+
    SetProtection ( Protect );
    myIO |= FLAG_FILE;
-  
+
   }  // end else
 
  }  // end else;
@@ -1026,24 +1033,24 @@ void OSD_File :: Append (
 // ---------------------------------------------------------------------
 // Read content of a file
 // ---------------------------------------------------------------------
- 
+
 void OSD_File :: Read (
                   TCollection_AsciiString& Buffer, const Standard_Integer Nbyte
                  ) {
 
- if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) { 
+ if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) {
 #ifdef OCCT_DEBUG
    cout << " OSD_File::Read : it is a directory " << endl;
 #endif
    return ;
 //   Standard_ProgramError::Raise("OSD_File::Read : it is a directory");
  }
-                                        
+
  Standard_Integer NbyteRead;
  Standard_Address buff;
 
  TEST_RAISE(  "Read"  );
-     
+
  buff = ( Standard_Address )new Standard_Character[ Nbyte + 1 ];
 
  Read ( buff, Nbyte, NbyteRead );
@@ -1084,37 +1091,37 @@ void OSD_File :: ReadLine (
  Standard_CString   eos;
  DWORD              dwSeekPos;
 
- if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) { 
+ if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) {
    Standard_ProgramError::Raise("OSD_File::Read : it is a directory");
  }
-                                        
- TEST_RAISE(  "ReadLine"  );              
+
+ TEST_RAISE(  "ReadLine"  );
 
  if (  myIO & FLAG_PIPE && !( myIO & FLAG_READ_PIPE )  )
 
   RAISE(  "OSD_File :: ReadLine (): attempt to read from write only pipe"  );
 
                                         // +----> leave space for end-of-string
-                                        // |       plus <CR><LF> sequence      
+                                        // |       plus <CR><LF> sequence
                                         // |
 
  ppeekChar=&peekChar;
  cBuffer = new Standard_Character[ NByte + 3 ];
 
  if ( myIO & FLAG_FILE ) {
- 
+
   if (!ReadFile (myFileHandle, cBuffer, (DWORD)NByte, &dwBytesRead, NULL)) {  // an error occured
 
-   _osd_wnt_set_error ( myError, OSD_WFile );   
+   _osd_wnt_set_error ( myError, OSD_WFile );
    Buffer.Clear ();
    NbyteRead = 0;
-   
+
   } else if ( dwBytesRead == 0 ) {  // end-of-file reached
-   
+
    Buffer.Clear ();
    NbyteRead = 0;
    myIO |= FLAG_EOF;
-   
+
   } else {
    myIO &= ~FLAG_EOF ;  // if the file increased since last read (LD)
    status = _get_line ( cBuffer, dwBytesRead );
@@ -1128,13 +1135,13 @@ void OSD_File :: ReadLine (
                                           // peek next character to see if it is a <LF>
 #endif
     if (!ReadFile (myFileHandle, ppeekChar, 1, &dwDummy, NULL)) {
-    
+
      _osd_wnt_set_error ( myError, OSD_WFile );
 
     } else if ( dwDummy != 0 ) {  // end-of-file reached ?
 
      if ( peekChar != '\n' )  // if we did not get a <CR><LF> sequence
-    
+
      // adjust file position
 
       SetFilePointer (myFileHandle, -1, NULL, FILE_CURRENT);
@@ -1154,10 +1161,10 @@ void OSD_File :: ReadLine (
    }
 
   }  // end else
-   
+
  } else if ( myIO & FLAG_SOCKET || myIO & FLAG_PIPE || myIO & FLAG_NAMED_PIPE ) {
 
-  dwBytesRead = (DWORD)_get_buffer (myFileHandle, cBuffer, 
+  dwBytesRead = (DWORD)_get_buffer (myFileHandle, cBuffer,
                                     (DWORD)NByte, TRUE, myIO & FLAG_SOCKET);
 
   if (  ( int )dwBytesRead == -1  ) { // an error occured
@@ -1181,8 +1188,8 @@ void OSD_File :: ReadLine (
 
 #ifdef VAC
    if ( (__int64) status == (__int64) -1 ) {  // last character in the buffer is <CR> -
-#else  
-   if ( status == 0xFFFFFFFFFFFFFFFF ) {  // last character in the buffer is <CR> -    
+#else
+   if ( status == 0xFFFFFFFFFFFFFFFF ) {  // last character in the buffer is <CR> -
                                           // peek next character to see if it is a <LF>
 #endif
 
@@ -1190,7 +1197,7 @@ void OSD_File :: ReadLine (
 
     dwDummy = _get_buffer (myFileHandle, ppeekChar, 1, TRUE, myIO & FLAG_SOCKET);
     if (  ( int )dwDummy == -1  ) {  // an error occured
-   
+
      _osd_wnt_set_error ( myError, OSD_WFile );
 
     } else if ( dwDummy != 0 ) {  // connection closed ?
@@ -1220,7 +1227,7 @@ void OSD_File :: ReadLine (
    delete [] cDummyBuffer ;
 
   }  // end else
-   
+
  } else
 
   RAISE(  "OSD_File :: ReadLine (): incorrect call - file is a directory"  );
@@ -1233,9 +1240,9 @@ void OSD_File :: ReadLine (
 
 }  // end OSD_File :: ReadLine
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Read content of a file
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 void OSD_File :: Read (
                   Standard_Address& Buffer,
@@ -1244,10 +1251,10 @@ void OSD_File :: Read (
 
  DWORD dwBytesRead;
 
- if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) { 
+ if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) {
    Standard_ProgramError::Raise("OSD_File::Read : it is a directory");
  }
-                                        
+
  TEST_RAISE(  "Read"  );
 
  if (  myIO & FLAG_PIPE && !( myIO & FLAG_READ_PIPE )  )
@@ -1255,10 +1262,10 @@ void OSD_File :: Read (
   RAISE(  "OSD_File :: Read (): attempt to read from write only pipe"  );
 
  if (!ReadFile (myFileHandle, Buffer, (DWORD)Nbyte, &dwBytesRead, NULL)) {
- 
+
   _osd_wnt_set_error ( myError, OSD_WFile );
   dwBytesRead = 0;
- 
+
  } else if ( dwBytesRead == 0 )
 
   myIO |= FLAG_EOF;
@@ -1280,9 +1287,9 @@ void OSD_File :: Write (
 
 }  // end OSD_File :: Write
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Write content of a file
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 void OSD_File :: Write (
                   const Standard_Address Buffer,
@@ -1297,7 +1304,7 @@ void OSD_File :: Write (
 
   RAISE(  "OSD_File :: Write (): attempt to write to read only pipe"  );
 
- if (!WriteFile (myFileHandle, Buffer, (DWORD)Nbyte, &dwBytesWritten, NULL) || 
+ if (!WriteFile (myFileHandle, Buffer, (DWORD)Nbyte, &dwBytesWritten, NULL) ||
      dwBytesWritten != (DWORD)Nbyte)
 
   _osd_wnt_set_error ( myError, OSD_WFile );
@@ -1315,7 +1322,7 @@ void OSD_File :: Seek (
  if ( myIO & FLAG_FILE || myIO & FLAG_DIRECTORY ) {
 
   switch ( Whence ) {
-  
+
    case OSD_FromBeginning:
 
     dwMoveMethod = FILE_BEGIN;
@@ -1337,22 +1344,22 @@ void OSD_File :: Seek (
    default:
 
     RAISE(  "OSD_File :: Seek (): invalid parameter"  );
-  
+
   }  // end switch
 
   if (SetFilePointer (myFileHandle, (LONG)Offset, NULL, dwMoveMethod) == 0xFFFFFFFF)
 
    _osd_wnt_set_error ( myError, OSD_WFile );
-  
+
  }  // end if
 
  myIO &= ~FLAG_EOF;
 
 }  // end OSD_File :: Seek
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Close a file
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 void OSD_File :: Close () {
 
@@ -1365,9 +1372,9 @@ void OSD_File :: Close () {
 
 }  // end OSD_File :: Close
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Test if at end of file
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 Standard_Boolean OSD_File :: IsAtEnd () {
 
@@ -1401,7 +1408,7 @@ OSD_KindFile OSD_File :: KindOfFile () const {
   flags = myIO;
 
  switch ( flags & FLAG_TYPE ) {
- 
+
   case FLAG_FILE:
 
    retVal = OSD_FILE;
@@ -1423,7 +1430,7 @@ OSD_KindFile OSD_File :: KindOfFile () const {
   default:
 
    retVal = OSD_UNKNOWN;
- 
+
  }  // end switch
 
  return retVal;
@@ -1484,23 +1491,23 @@ OSD_File OSD_File :: BuildTemporary () {
  TCHAR          tmpPath[ MAX_PATH ];
  BOOL           fOK = FALSE;
  OSD_WNT_KEY    regKey[ 2 ] = {
- 
+
                  { HKEY_LOCAL_MACHINE,
                    "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
                  },
                  { HKEY_USERS,
                    ".DEFAULT\\Environment"
                  }
- 
+
                 };
- 
+
  for ( int i = 0; i < 2; ++i ) {
 
   if (  RegOpenKeyEx (
          regKey[ i ].hKey, regKey[ i ].keyPath, 0, KEY_QUERY_VALUE, &hKey
        ) == ERROR_SUCCESS
   ) {
-  
+
    DWORD dwType;
    DWORD dwSize = 0;
 
@@ -1508,7 +1515,7 @@ OSD_File OSD_File :: BuildTemporary () {
           hKey, "TEMP", NULL, &dwType, NULL, &dwSize
          ) == ERROR_SUCCESS
    ) {
-  
+
     LPTSTR kVal = ( LPTSTR )HeapAlloc (
                              GetProcessHeap (), HEAP_ZERO_MEMORY | HEAP_GENERATE_EXCEPTIONS,
                              dwSize + sizeof ( TCHAR )
@@ -1517,7 +1524,7 @@ OSD_File OSD_File :: BuildTemporary () {
      RegQueryValueEx (  hKey, "TEMP", NULL, &dwType, ( LPBYTE )kVal, &dwSize  );
 
      if ( dwType == REG_EXPAND_SZ )
-    
+
       ExpandEnvironmentStrings ( kVal, tmpPath, MAX_PATH );
 
      else
@@ -1538,7 +1545,7 @@ OSD_File OSD_File :: BuildTemporary () {
  }  // end for
 
  if ( !fOK ) lstrcpy (  tmpPath, "./"  );
- 
+
  GetTempFileName ( tmpPath, "CSF", 0, tmpPath );
 
  retVal.SetPath (  OSD_Path ( tmpPath )  );
@@ -1564,7 +1571,7 @@ void OSD_File :: SetLock ( const OSD_LockType Lock ) {
  OVERLAPPED ovlp;
 
  TEST_RAISE(  "SetLock"  );
- 
+
  ZeroMemory (  &ovlp, sizeof ( OVERLAPPED )  );
 
  __try {
@@ -1613,15 +1620,15 @@ void OSD_File :: UnLock () {
  TEST_RAISE(  "Unlock"  );
 
  if ( ImperativeFlag ) {
- 
+
   LARGE_INTEGER aSize;
   aSize.QuadPart = Size();
   if (!UnlockFile (myFileHandle, 0, 0, aSize.LowPart, aSize.HighPart))
-   
+
    _osd_wnt_set_error ( myError, OSD_WFile );
 
   ImperativeFlag = Standard_False;
- 
+
  }  // end if
 
 }  // end OSD_File :: UnLock
@@ -1641,9 +1648,9 @@ Standard_Boolean OSD_File :: IsLocked () {
 }  // end OSD_File :: IsLocked
 
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Return size of a file
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 Standard_Size OSD_File :: Size () {
 
@@ -1663,9 +1670,9 @@ Standard_Size OSD_File :: Size () {
 
 }  // end OSD_File :: Size
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Print contains of a file
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 void OSD_File :: Print ( const OSD_Printer& WhichPrinter ) {
 
@@ -1686,9 +1693,9 @@ void OSD_File :: Print ( const OSD_Printer& WhichPrinter ) {
 
 }  // end OSD_File :: Print
 
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 // Test if a file is open
-// -------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------
 
 Standard_Boolean OSD_File :: IsOpen () const {
 
@@ -1745,8 +1752,8 @@ PSECURITY_DESCRIPTOR __fastcall _osd_wnt_protection_to_sd (
                                           hProcess, TokenGroups
                                          )
          ) == NULL
-  ) __leave; 
-  
+  ) __leave;
+
   if (   (  pTkOwner = ( PTOKEN_OWNER )GetTokenInformationEx (
                                         hProcess, TokenOwner
                                        )
@@ -1792,7 +1799,7 @@ retry:
   dwAccessWorldDir = _get_dir_access_mask (  prot.World  ()  );
 
   if (  dwAccessGroup != 0  ) {
-                                             
+
    for ( i = 0; i < ( int )pTkGroups -> GroupCount; ++i ) {
 
     pSIDtemp = pTkGroups -> Groups[ i ].Sid;
@@ -1806,7 +1813,7 @@ retry:
      dwACLsize += ( (  GetLengthSid ( pSIDtemp ) + ACE_HEADER_SIZE  ) << j );
 
    }  // end for
-  
+
   }  // end if
 
   dwACLsize += (  ( ( GetLengthSid ( pSIDowner ) + ACE_HEADER_SIZE ) << j ) +
@@ -1854,7 +1861,7 @@ retry:
      pFileACE -> dwMask = dwAccessOwnerDir;
      pFileACE -> header.AceFlags = OBJECT_INHERIT_ACE | CONTAINER_INHERIT_ACE | INHERIT_ONLY_ACE;
      AddAce ( pACL, ACL_REVISION, dwIndex++, pFileACE, pFileACE -> header.AceSize );
-   
+
     }  // end if
 
     FreeAce ( pFileACE );
@@ -1875,7 +1882,7 @@ retry:
 
      pFileACE -> header.AceFlags = OBJECT_INHERIT_ACE | CONTAINER_INHERIT_ACE | INHERIT_ONLY_ACE;
      AddAce ( pACL, ACL_REVISION, dwIndex++, pFileACE, pFileACE -> header.AceSize );
-   
+
     }  // end if
 
     FreeAce ( pFileACE );
@@ -1908,7 +1915,7 @@ retry:
 
        pFileACE -> header.AceFlags = OBJECT_INHERIT_ACE | CONTAINER_INHERIT_ACE | INHERIT_ONLY_ACE;
        AddAce ( pACL, ACL_REVISION, dwIndex++, pFileACE, pFileACE -> header.AceSize );
-   
+
       }  // end if
 
       FreeAce ( pFileACE );
@@ -1930,11 +1937,11 @@ retry:
  }  // end __try
 
  __finally {
- 
+
   if ( !fOK ) {
 
    if ( retVal != NULL )
-       
+
     FreeSD ( retVal );
 
    else if ( pACL != NULL )
@@ -1942,7 +1949,7 @@ retry:
     FreeAcl ( pACL );
 
    retVal = NULL;
-  
+
   }  // end if
 
   if ( hProcess        != NULL ) CloseHandle          ( hProcess        );
@@ -1950,7 +1957,7 @@ retry:
   if ( pTkGroups       != NULL ) FreeTokenInformation ( pTkGroups       );
   if ( pTkPrimaryGroup != NULL ) FreeTokenInformation ( pTkPrimaryGroup );
   if ( pfSD            != NULL ) FreeFileSecurity     ( pfSD            );
- 
+
  }  // end __finally
 
 #ifdef VAC
@@ -1958,7 +1965,7 @@ leave: ;     // added for VisualAge
 #endif
 
  return retVal;
- 
+
 }  // end _osd_wnt_protection_to_sd */
 
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
@@ -1972,13 +1979,13 @@ static void __fastcall _test_raise ( HANDLE hFile, Standard_CString str ) {
  Standard_Character buff[ 64 ];
 
  if (hFile == INVALID_HANDLE_VALUE) {
- 
+
   strcpy (  buff, "OSD_File :: "  );
   strcat (  buff, str );
   strcat (  buff, " (): wrong access"  );
 
   Standard_ProgramError :: Raise ( buff );
- 
+
  }  // end if
 
 }  // end _test_raise
@@ -1995,9 +2002,9 @@ static DWORDLONG __fastcall _get_line ( Standard_PCharacter& buffer, DWORD dwBuf
  ptr                  = buffer;
 
  while ( *ptr != 0 ) {
- 
+
   if (  *ptr == '\n'  ) {
-  
+
    ptr++ ;   // jump newline char.
    *ptr = 0 ;
    retVal = ptr - buffer - dwBuffSize;
@@ -2006,11 +2013,11 @@ static DWORDLONG __fastcall _get_line ( Standard_PCharacter& buffer, DWORD dwBuf
    retVal = (DWORDLONG) ( (unsigned __int64) retVal | (((unsigned __int64) ptr) << 32) );
 #else
    retVal |= (   (  ( DWORDLONG )( DWORD )ptr  ) << 32   );
-#endif   
+#endif
    return retVal;
-  
+
   } else if (  *ptr == '\r' && ptr[ 1 ] == '\n'  ) {
-  
+
    *(ptr++) = '\n' ; // Substitue carriage return by newline.
    *ptr = 0 ;
    retVal = ptr + 1 - buffer - dwBuffSize;
@@ -2021,18 +2028,18 @@ static DWORDLONG __fastcall _get_line ( Standard_PCharacter& buffer, DWORD dwBuf
    retVal |= (   (  ( DWORDLONG )( DWORD )ptr  ) << 32   );
 #endif
    return retVal;
-  
+
   } else if (  *ptr == '\r' && ptr[ 1 ] == 0  ) {
     *ptr = '\n' ; // Substitue carriage return by newline
 
-#ifdef VAC  
+#ifdef VAC
     return (DWORDLONG) (__int64) (-1);
 #else
     return 0xFFFFFFFFFFFFFFFF;
 #endif
   }
   ++ptr;
-  
+
  }  // end while
 
 #ifdef VAC
@@ -2049,8 +2056,8 @@ static DWORDLONG __fastcall _get_line ( Standard_PCharacter& buffer, DWORD dwBuf
 
 static int __fastcall _get_buffer (
                         HANDLE hChannel,
-                        Standard_PCharacter& buffer, 
-				   DWORD dwSize,
+                        Standard_PCharacter& buffer,
+                   DWORD dwSize,
                         BOOL fPeek, BOOL fSocket
                        ) {
 
@@ -2060,7 +2067,7 @@ static int __fastcall _get_buffer (
  DWORD dwBytesRead;
 
  if ( fSocket ) {
- 
+
   flags = fPeek ? MSG_PEEK : 0;
 
   retVal = recv (  ( SOCKET )hChannel, buffer, ( int )dwSize, flags  );
@@ -2068,9 +2075,9 @@ static int __fastcall _get_buffer (
   if ( retVal == SOCKET_ERROR ) retVal = -1;
 
  } else {
- 
+
   if ( fPeek ) {
-   
+
    if (  !PeekNamedPipe (
            hChannel, buffer, dwSize, &dwBytesRead, &dwDummy, &dwDummy
           ) && GetLastError () != ERROR_BROKEN_PIPE
@@ -2081,19 +2088,19 @@ static int __fastcall _get_buffer (
    else
 
     retVal = ( int )dwBytesRead;
-   
+
   } else {
 
    if (  !ReadFile ( hChannel, buffer, dwSize, &dwBytesRead, NULL )  )
-       
+
     retVal = -1;
 
    else
 
     retVal = ( int )dwBytesRead;
-   
+
   }  // end else
- 
+
  }  // end else
 
  return retVal;
@@ -2106,7 +2113,7 @@ static DWORD __fastcall _get_access_mask ( OSD_SingleProtection prt ) {
  DWORD retVal = 0;
 
  switch ( prt ) {
- 
+
   case OSD_None:
 
    retVal = 0;
@@ -2206,7 +2213,7 @@ static DWORD __fastcall _get_access_mask ( OSD_SingleProtection prt ) {
   default:
 
    RAISE(  "_get_access_mask (): incorrect parameter"  );
- 
+
  }  // end switch
 
  return retVal;
@@ -2218,7 +2225,7 @@ static DWORD __fastcall _get_dir_access_mask ( OSD_SingleProtection prt ) {
  DWORD retVal = 0;
 
  switch ( prt ) {
- 
+
   case OSD_None:
 
    retVal = 0;
@@ -2318,7 +2325,7 @@ static DWORD __fastcall _get_dir_access_mask ( OSD_SingleProtection prt ) {
   default:
 
    RAISE(  "_get_dir_access_mask (): incorrect parameter"  );
- 
+
  }  // end switch
 
  return retVal;
@@ -2336,7 +2343,7 @@ static HANDLE __fastcall _open_file (
  DWORD  dwCreationDistribution;
 
  switch ( oMode ) {
-  
+
   case OSD_ReadOnly:
 
    dwDesiredAccess = GENERIC_READ;
@@ -2358,7 +2365,7 @@ static HANDLE __fastcall _open_file (
   default:
 
    RAISE(  "_open_file (): incorrect parameter"  );
-  
+
  }  // end switch
 
  dwCreationDistribution = ( dwOptions != OPEN_NEW ) ? OPEN_EXISTING : CREATE_ALWAYS;
@@ -2376,9 +2383,9 @@ static HANDLE __fastcall _open_file (
       GetLastError () == ERROR_FILE_NOT_FOUND
  ) {
 
- 
+
   dwCreationDistribution = CREATE_ALWAYS;
-  
+
   retVal = CreateFileW (
             (const wchar_t*) fNameW.ToExtString(), dwDesiredAccess,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -2401,11 +2408,11 @@ Standard_Integer __fastcall _get_file_type (
  DWORD            dwType;
  int              fileType;
 
- fileType = (fileHandle == INVALID_HANDLE_VALUE ? 
+ fileType = (fileHandle == INVALID_HANDLE_VALUE ?
              FILE_TYPE_DISK : GetFileType (fileHandle));
 
  switch ( fileType ) {
- 
+
   case FILE_TYPE_UNKNOWN:
 
    retVal = FLAG_SOCKET;
@@ -2438,7 +2445,7 @@ Standard_Integer __fastcall _get_file_type (
    retVal = FLAG_PIPE;
 
   break;
- 
+
  }  // end switch
 
  return retVal;
@@ -2479,19 +2486,19 @@ BOOL __fastcall _osd_wnt_sd_to_protection (
   ) __leave;
 
   if ( pSIDowner == NULL || pACL == NULL ) {
-  
+
    SetLastError ( ERROR_NO_SECURITY_ON_OBJECT );
    __leave;
-  
+
   }  // end if
- 
+
   pSIDadmin = AdminSid ();
   pSIDworld = WorldSid ();
 
   for ( i = 0; i < ( int )pACL -> AceCount; ++i ) {
-  
+
    if (  GetAce ( pACL, i, &pACE )  ) {
-   
+
     if (   EqualSid (  pSIDowner, GET_SID( pACE )  )   )
 
      dwAccessOwner = (  ( PACE_HEADER )pACE  ) -> AceType == ACCESS_DENIED_ACE_TYPE ?
@@ -2511,9 +2518,9 @@ BOOL __fastcall _osd_wnt_sd_to_protection (
 
      dwAccessGroup = (  ( PACE_HEADER )pACE  ) -> AceType == ACCESS_DENIED_ACE_TYPE ?
                      0 : *GET_MSK( pACE );
-   
+
    }  // end if
-  
+
   }  // end for
 
   prot.SetValues (
@@ -2524,11 +2531,11 @@ BOOL __fastcall _osd_wnt_sd_to_protection (
        );
 
   retVal = TRUE;
-  
+
  }  // end __try
 
  __finally {}
-       
+
 #ifdef VAC
 leave: ;      // added for VisualAge
 #endif
@@ -2548,7 +2555,7 @@ static OSD_SingleProtection __fastcall _get_protection ( DWORD mask ) {
  OSD_SingleProtection retVal;
 
  switch ( mask ) {
- 
+
   case FILE_GENERIC_READ:
 
    retVal = OSD_R;
@@ -2644,7 +2651,7 @@ static OSD_SingleProtection __fastcall _get_protection ( DWORD mask ) {
   default:
 
    retVal = OSD_None;
- 
+
  }  // end switch
 
  return retVal;
@@ -2656,7 +2663,7 @@ static OSD_SingleProtection __fastcall _get_protection_dir ( DWORD mask ) {
  OSD_SingleProtection retVal;
 
  switch ( mask ) {
- 
+
   case GENERIC_READ:
 
    retVal = OSD_R;
@@ -2752,7 +2759,7 @@ static OSD_SingleProtection __fastcall _get_protection_dir ( DWORD mask ) {
   default:
 
    retVal = OSD_None;
- 
+
  }  // end switch
 
  return retVal;
@@ -2767,7 +2774,7 @@ static OSD_SingleProtection __fastcall _get_protection_dir ( DWORD mask ) {
 
 BOOL __fastcall _osd_print (const Standard_PCharacter pName, const wchar_t* fName ) {
 
- BOOL   fOK, fJob;                
+ BOOL   fOK, fJob;
  HANDLE hPrinter = NULL;
  BYTE   jobInfo[ MAX_PATH + sizeof ( DWORD ) ];
  DWORD  dwNeeded, dwCode = 0;
@@ -2775,12 +2782,12 @@ BOOL __fastcall _osd_print (const Standard_PCharacter pName, const wchar_t* fNam
  fOK = fJob = FALSE;
 
  __try {
- 
+
   if (  !OpenPrinter ( Standard_PCharacter(pName), &hPrinter, NULL )  ) {
-  
+
    hPrinter = NULL;
    __leave;
-  
+
   }  // end if
 
   if (   !AddJobW (
@@ -2799,15 +2806,15 @@ BOOL __fastcall _osd_print (const Standard_PCharacter pName, const wchar_t* fNam
           hPrinter, (  ( ADDJOB_INFO_1* )jobInfo  ) -> JobId
          )
   ) __leave;
-  
+
   fOK = TRUE;
- 
+
  }  // end __try
 
  __finally {
- 
+
   if ( !fOK ) {
-  
+
    BYTE  info[ 1024 ];
    DWORD dwBytesNeeded;
 
@@ -2816,7 +2823,7 @@ BOOL __fastcall _osd_print (const Standard_PCharacter pName, const wchar_t* fNam
    if ( fJob && hPrinter != NULL ) {
 
     GetJob (
-     hPrinter, (  ( ADDJOB_INFO_1* )jobInfo  ) -> JobId, 1, 
+     hPrinter, (  ( ADDJOB_INFO_1* )jobInfo  ) -> JobId, 1,
      info, 1024, &dwBytesNeeded
     );
 
@@ -2831,7 +2838,7 @@ BOOL __fastcall _osd_print (const Standard_PCharacter pName, const wchar_t* fNam
   }  // end if
 
   if ( hPrinter != NULL ) ClosePrinter ( hPrinter );
- 
+
  }  // end __finally
 
 #ifdef VAC
@@ -2841,7 +2848,7 @@ leave: ;       // added for VisualAge
  if ( !fOK ) SetLastError ( dwCode );
 
  return fOK;
-                
+
 }  // end _osd_print
 
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
@@ -2908,7 +2915,7 @@ Standard_Boolean OSD_File::ReadLastLine(TCollection_AsciiString& aLine,const Sta
       return Standard_False ;
   for(;;) {
     ReadLine(aLine, MaxLength, Len) ;
-    if (!aLine.IsEmpty()) 
+    if (!aLine.IsEmpty())
       return Standard_True ;
     if (!--Count)
       return Standard_False ;

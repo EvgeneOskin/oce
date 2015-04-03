@@ -13,7 +13,8 @@ endif()
 
 add_definitions (-DCSFDB)
 if (WIN32)
-  add_definitions (/DWNT -wd4996)
+  add_definitions (/DWNT )
+  add_definitions(-DHAVE_NO_DLL=1)
 elseif (APPLE)
   add_definitions (-fexceptions -fPIC -DOCC_CONVERT_SIGNALS -DHAVE_WOK_CONFIG_H -DHAVE_CONFIG_H)
 else()
@@ -25,7 +26,8 @@ string (REGEX MATCH "EHsc" ISFLAG "${CMAKE_CXX_FLAGS}")
 if (ISFLAG)
   string (REGEX REPLACE "EHsc" "EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 elseif (WIN32)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHa")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -v")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ")
 endif()
 
 # remove DEBUG flag if it exists
@@ -66,3 +68,5 @@ set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DNo_Exception")
 
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEB")
 set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEB")
+
+

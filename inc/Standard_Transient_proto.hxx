@@ -23,7 +23,7 @@ class Handle_Standard_Transient;
 class Standard_Type;
 class Handle_Standard_Type;
 
-//! Abstract class which forms the root of the entire 
+//! Abstract class which forms the root of the entire
 //! Transient class hierarchy.
 
 class Standard_Transient
@@ -32,7 +32,7 @@ class Standard_Transient
     friend class Handle(Standard_Transient);
 
  public:
-    
+
     DEFINE_STANDARD_ALLOC
 
     //! Empty constructor
@@ -44,20 +44,21 @@ class Standard_Transient
     //! Assignment operator, needed to avoid copying reference counter
     Standard_Transient& operator= (const Standard_Transient&) { return *this; }
 
-    //! Destructor must be virtual
-    Standard_EXPORT virtual ~Standard_Transient();
 
     //! Memory deallocator for transient classes
-    Standard_EXPORT virtual void Delete() const;
+    Standard_EXPORT     virtual void Delete() const;
+
+    //! Destructor must be virtual
+    Standard_EXPORT virtual ~Standard_Transient();
 
     //! Returns a type information object about this object.
     Standard_EXPORT virtual const Handle_Standard_Type& DynamicType() const;
 
     //! Returns a true value if this is an instance of Type.
-    Standard_EXPORT Standard_Boolean IsInstance(const Handle_Standard_Type& theType) const;  
+    Standard_EXPORT Standard_Boolean IsInstance(const Handle_Standard_Type& theType) const;
 
     //! Returns a true value if this is an instance of TypeName.
-    Standard_EXPORT Standard_Boolean IsInstance(const Standard_CString theTypeName) const;  
+    Standard_EXPORT Standard_Boolean IsInstance(const Standard_CString theTypeName) const;
 
     //! Returns true if this is an instance of Type or an
     //! instance of any class that inherits from Type.
@@ -83,4 +84,4 @@ class Standard_Transient
 
 Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(Standard_Transient);
 
-#endif 
+#endif

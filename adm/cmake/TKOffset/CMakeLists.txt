@@ -1,10 +1,10 @@
 project(TKOffset)
 
 if (WIN32)
-  list( APPEND TKOffset_PRECOMPILED_DEFS "-D__BRepOffsetAPI_DLL" )
-  list( APPEND TKOffset_PRECOMPILED_DEFS "-D__Draft_DLL" )
-  list( APPEND TKOffset_PRECOMPILED_DEFS "-D__BRepOffset_DLL" )
-  list( APPEND TKOffset_PRECOMPILED_DEFS "-D__BiTgte_DLL" )
+#  list( APPEND TKOffset_PRECOMPILED_DEFS "-D__BRepOffsetAPI_DLL" )
+#  list( APPEND TKOffset_PRECOMPILED_DEFS "-D__Draft_DLL" )
+#  list( APPEND TKOffset_PRECOMPILED_DEFS "-D__BRepOffset_DLL" )
+#  list( APPEND TKOffset_PRECOMPILED_DEFS "-D__BiTgte_DLL" )
   string( REGEX REPLACE ";" " " TKOffset_PRECOMPILED_DEFS "${TKOffset_PRECOMPILED_DEFS}")
 endif()
 
@@ -726,7 +726,7 @@ ELSE()
 ENDIF()
 
 if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKOffset)
- add_library( TKOffset SHARED ${TKOffset_USED_SRCFILES} )
+ add_library( TKOffset STATIC ${TKOffset_USED_SRCFILES} )
 
  set_property(TARGET TKOffset PROPERTY FOLDER ModelingAlgorithms)
 
@@ -745,3 +745,4 @@ if ("${USED_TOOLKITS}" STREQUAL "" OR DEFINED TurnONtheTKOffset)
  include_directories( ${TKOffset_COMPILER_DIRECTORIES} )
  target_link_libraries( TKOffset ${TKOffset_USED_LIBS} )
 endif()
+
