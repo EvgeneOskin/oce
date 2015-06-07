@@ -19,7 +19,7 @@ set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 set (CMAKE_BUILD_TYPE ${BUILD_CONFIGURATION} CACHE INTERNAL "Build type of OCCT" FORCE )
 
 # install dir of the built project
-set (INSTALL_DIR "" CACHE PATH "Directory that will contain install files of OCCT" )
+set (INSTALL_DIR "../opencascade-6.8.0-build" CACHE PATH "Directory that will contain install files of OCCT" )
 set (CMAKE_INSTALL_PREFIX "${INSTALL_DIR}" CACHE INTERNAL "" FORCE )
 
 # whether install test bundle or not
