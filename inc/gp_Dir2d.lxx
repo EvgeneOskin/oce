@@ -20,7 +20,9 @@
 #include <gp_Ax2d.hxx>
 #include <gp_Trsf2d.hxx>
 
-inline gp_Dir2d::gp_Dir2d() : coord (1.,0.) 
+#define M_PI 3.1415926535897932384626433832795
+
+inline gp_Dir2d::gp_Dir2d() : coord (1.,0.)
 {
 }
 
@@ -46,7 +48,7 @@ inline gp_Dir2d::gp_Dir2d (const gp_XY& XY)
 }
 
 inline gp_Dir2d::gp_Dir2d (const Standard_Real Xv,
-			   const Standard_Real Yv)
+                           const Standard_Real Yv)
 {
   Standard_Real D = sqrt (Xv * Xv + Yv * Yv);
   Standard_ConstructionError_Raise_if (D <= gp::Resolution(), "");
@@ -55,7 +57,7 @@ inline gp_Dir2d::gp_Dir2d (const Standard_Real Xv,
 }
 
 inline void gp_Dir2d::SetCoord (const Standard_Integer Index,
-				const Standard_Real Xi)
+                                const Standard_Real Xi)
 {
   Standard_Real X = coord.X();
   Standard_Real Y = coord.Y();
@@ -69,7 +71,7 @@ inline void gp_Dir2d::SetCoord (const Standard_Integer Index,
 }
 
 inline void gp_Dir2d::SetCoord (const Standard_Real Xv,
-				const Standard_Real Yv)
+                                const Standard_Real Yv)
 {
   Standard_Real D = sqrt (Xv * Xv + Yv * Yv);
   Standard_ConstructionError_Raise_if (D <= gp::Resolution(), "");
@@ -112,7 +114,7 @@ inline void gp_Dir2d::Coord(Standard_Real& Xv, Standard_Real& Yv) const
 { coord.Coord (Xv, Yv); }
 
 inline Standard_Real gp_Dir2d::X() const
-{ return coord.X() ; }    
+{ return coord.X() ; }
 
 inline Standard_Real gp_Dir2d::Y() const
 { return coord.Y() ; }
@@ -127,7 +129,7 @@ inline Standard_Boolean gp_Dir2d::IsEqual
   Standard_Real Ang = Angle(Other);
   if (Ang < 0) Ang = - Ang;
   return   Ang <= AngularTolerance;
-}    
+}
 
 inline Standard_Boolean gp_Dir2d::IsNormal
 (const gp_Dir2d& Other,
@@ -138,16 +140,16 @@ inline Standard_Boolean gp_Dir2d::IsNormal
   Ang = M_PI / 2.0 - Ang;
   if (Ang < 0) Ang = - Ang;
   return   Ang <= AngularTolerance;
-}    
+}
 
 inline Standard_Boolean gp_Dir2d::IsOpposite
 (const gp_Dir2d& Other,
  const Standard_Real AngularTolerance) const
-{ 
+{
   Standard_Real Ang = Angle(Other);
   if (Ang < 0) Ang = - Ang;
   return M_PI - Ang <= AngularTolerance;
-}    
+}
 
 inline Standard_Boolean gp_Dir2d::IsParallel
 (const gp_Dir2d& Other,
@@ -156,7 +158,7 @@ inline Standard_Boolean gp_Dir2d::IsParallel
   Standard_Real Ang = Angle(Other);
   if (Ang < 0) Ang = - Ang;
   return   Ang <= AngularTolerance || M_PI - Ang <= AngularTolerance;
-}    
+}
 
 inline Standard_Real gp_Dir2d::Crossed (const gp_Dir2d& Right) const
 { return coord.Crossed (Right.coord); }
@@ -168,7 +170,7 @@ inline void gp_Dir2d::Reverse()
 { coord.Reverse(); }
 
 inline gp_Dir2d gp_Dir2d::Reversed() const
-{ 
+{
   gp_Dir2d V = *this;
   V.coord.Reverse ();
   return V;
@@ -193,5 +195,5 @@ inline gp_Dir2d gp_Dir2d::Transformed (const gp_Trsf2d& T) const
   gp_Dir2d V = *this;
   V.Transform (T);
   return V;
-} 
+}
 
